@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${nctTitle}">Profile NCT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <header class="d-flex align-items-center border-bottom pb-3 mb-4">
+        <img src="https://devmaster.edu.vn/images/logo.png" alt="Devmaster" class="me-3" style="height: 60px;">
+        <div>
+            <h1 th:text="${nctTitle}">NCT Profile</h1>
+        </div>
+    </header>
+
+    <section class="row">
+        <div class="col-md-12">
+            <div class="card" th:each="nctInfo : ${nctDevmasterProfile}">
+                <div class="card-header bg-warning">
+                    <h4 th:text="${nctInfo.nctName}">Tên</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>NickName NCT:</strong> <span th:text="${nctInfo.nctNickName}"></span></p>
+                    <p><strong>Email NCT:</strong> <span th:text="${nctInfo.nctEmail}"></span></p>
+                    <p><strong>Website NCT:</strong> <span th:text="${nctInfo.nctWebsite}"></span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="mt-3">
+        <a th:href="@{/}" class="btn btn-success">Quay lại trang chủ NCT</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NCT Info Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h3>NCT Information Page</h3>
+        </div>
+        <div class="card-body">
+            <p class="lead" th:text="${nctMessage}">Thông tin NCT</p>
+            <div class="alert alert-info">
+                <h5>Thông tin lớp với tiền tố NCT:</h5>
+                <ul>
+                    <li>Lớp: <strong>NctInfo</strong></li>
+                    <li>Controller: <strong>NctHomeController</strong></li>
+                    <li>Application: <strong>NctDay05Application</strong></li>
+                </ul>
+            </div>
+            <a th:href="@{/}" class="btn btn-primary">Quay lại NCT Home</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
