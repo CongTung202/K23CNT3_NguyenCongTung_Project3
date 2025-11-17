@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Day07Application<day07>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "k23cnt3.nguyencongtung.day07.Day07Application",
+            "projectName": "day07",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
