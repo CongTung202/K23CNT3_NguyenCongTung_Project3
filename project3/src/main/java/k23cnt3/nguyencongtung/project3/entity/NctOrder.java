@@ -149,4 +149,16 @@ public class NctOrder {
 
     public NctOrder() {
     }
+    // Thêm method tiện ích
+    @Transient
+    public int getNctItemCount() {
+        return nctOrderItems != null ? nctOrderItems.stream()
+                .mapToInt(NctOrderItem::getNctQuantity)
+                .sum() : 0;
+    }
+
+    @Transient
+    public String getNctFormattedTotal() {
+        return "₫" + String.format("%,.0f", nctTotalAmount.doubleValue());
+    }
 }

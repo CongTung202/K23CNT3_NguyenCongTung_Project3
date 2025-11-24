@@ -13,6 +13,7 @@ public interface NctOrderRepository extends JpaRepository<NctOrder, Long> {
     List<NctOrder> findByNctUser(NctUser nctUser);
     List<NctOrder> findByNctStatus(NctOrder.NctOrderStatus nctStatus);
 
+
     @Query("SELECT o FROM NctOrder o ORDER BY o.nctCreatedAt DESC")
     List<NctOrder> findAllByOrderByNctCreatedAtDesc();
 

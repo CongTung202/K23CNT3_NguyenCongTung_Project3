@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "nct_users")
@@ -42,10 +44,26 @@ public class NctUser {
     @Column(name = "nct_updated_at")
     private LocalDateTime nctUpdatedAt = LocalDateTime.now();
 
+    // QUAN TRỌNG: Thêm relationship với orders
+    @OneToMany(mappedBy = "nctUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<NctOrder> nctOrders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "nctUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<NctCartItem> nctCartItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "nctUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<NctWishlist> nctWishlistItems = new ArrayList<>();
+
     public enum NctRole {
         ADMIN, USER
     }
+    public List<NctOrder> getNctOrders() {
+        return nctOrders;
+    }
 
+    public void setNctOrders(List<NctOrder> nctOrders) {
+        this.nctOrders = nctOrders;
+    }
     public NctUser() {
     }
 
@@ -140,5 +158,20 @@ public class NctUser {
 
     public void setNctUpdatedAt(LocalDateTime nctUpdatedAt) {
         this.nctUpdatedAt = nctUpdatedAt;
+    }
+    // Thêm method tiện ích nếu cần
+    @Transient
+    public int getNctOrderCount() {
+        return nctOrders != null ? nctOrders.size() : 0;
+    }
+
+    @Transient
+    public String getNctInitials() {
+        if (nctFullName != null && !nctFullName.isEmpty()) {
+            return nctFullName.substring(0, 1).toUpperCase();
+        } else if (nctUsername != null && !nctUsername.isEmpty()) {
+            return nctUsername.substring(0, 1).toUpperCase();
+        }
+        return "U";
     }
 }
