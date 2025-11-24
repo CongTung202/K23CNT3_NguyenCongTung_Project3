@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${nctPageTitle}">NCT Otaku Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .nct-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+        }
+        .nct-product-card {
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nct-product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .nct-discount-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div th:replace="shared/nct-header :: header"></div>
+
+<!-- Hero Section -->
+<section class="nct-hero text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Chào mừng đến với NCT Otaku Store</h1>
+        <p class="lead">Thế giới đồ lưu niệm Anime, Manga và Game chính hãng</p>
+        <a href="/products" class="btn btn-light btn-lg mt-3">
+            <i class="fas fa-shopping-bag"></i> Mua sắm ngay
+        </a>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Sản phẩm nổi bật</h2>
+        <div class="row">
+            <div th:each="product : ${nctFeaturedProducts}" class="col-md-3 mb-4">
+                <div class="card nct-product-card h-100">
+                    <div class="position-relative">
+                        <img th:src="${product.nctImageUrl}"
+                             th:alt="${product.nctProductName}"
+                             class="card-img-top"
+                             onerror="this.src='/images/noimage.png'"
+                             style="height: 200px; object-fit: cover;">
+                        <span th:if="${product.nctOriginalPrice != null}"
+                              class="nct-discount-badge">
+                                Giảm <span th:text="${#numbers.formatDecimal((product.nctOriginalPrice.doubleValue() - product.nctPrice.doubleValue()) / product.nctOriginalPrice.doubleValue() * 100, 0, 0)}"></span>%
+                            </span>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${product.nctProductName}"></h5>
+                        <p class="card-text flex-grow-1" th:text="${#strings.abbreviate(product.nctDescription, 100)}"></p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                        <span class="text-danger fw-bold"
+                                              th:text="'₫' + ${#numbers.formatDecimal(product.nctPrice, 0, 'COMMA', 0, 'POINT')}">
+                                        </span>
+                                    <span th:if="${product.nctOriginalPrice != null}"
+                                          class="text-muted text-decoration-line-through ms-2"
+                                          th:text="'₫' + ${#numbers.formatDecimal(product.nctOriginalPrice, 0, 'COMMA', 0, 'POINT')}">
+                                        </span>
+                                </div>
+                                <a th:href="@{/products/{id}(id=${product.nctProductId})}"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- New Arrivals -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Sản phẩm mới</h2>
+        <div class="row">
+            <div th:each="product : ${nctNewProducts}" class="col-md-3 mb-4">
+                <div class="card nct-product-card h-100">
+                    <img th:src="${product.nctImageUrl}"
+                         th:alt="${product.nctProductName}"
+                         class="card-img-top"
+                         onerror="this.src='/images/noimage.png'"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${product.nctProductName}"></h5>
+                        <p class="card-text text-danger fw-bold"
+                           th:text="'₫' + ${#numbers.formatDecimal(product.nctPrice, 0, 'COMMA', 0, 'POINT')}">
+                        </p>
+                        <a th:href="@{/products/{id}(id=${product.nctProductId})}"
+                           class="btn btn-outline-primary mt-auto">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<div th:replace="shared/nct-footer :: footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

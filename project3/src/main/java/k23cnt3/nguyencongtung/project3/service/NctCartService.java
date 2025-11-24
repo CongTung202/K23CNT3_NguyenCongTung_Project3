@@ -1,0 +1,78 @@
+package k23cnt3.nguyencongtung.project3.service;
+
+import k23cnt3.nguyencongtung.project3.entity.NctCartItem;
+import k23cnt3.nguyencongtung.project3.entity.NctUser;
+import k23cnt3.nguyencongtung.project3.entity.NctProduct;
+import k23cnt3.nguyencongtung.project3.repository.NctCartItemRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+public class NctCartService {
+    private final NctCartItemRepository nctCartItemRepository;
+    private final NctProductService nctProductService;
+
+    @Autowired
+    public NctCartService(NctCartItemRepository nctCartItemRepository, NctProductService nctProductService) {
+        this.nctCartItemRepository = nctCartItemRepository;
+        this.nctProductService = nctProductService;
+    }
+    public List<NctCartItem> nctGetCartItems(NctUser nctUser) {
+        return nctCartItemRepository.findByNctUser(nctUser);
+    }
+
+    public NctCartItem nctAddToCart(NctUser nctUser, Long nctProductId, Integer nctQuantity) {
+        Optional<NctProduct> nctProductOpt = nctProductService.nctGetProductById(nctProductId);
+        if (nctProductOpt.isEmpty()) {
+            throw new RuntimeException("Sản phẩm không tồn tại");
+        }
+
+        NctProduct nctProduct = nctProductOpt.get();
+        Optional<NctCartItem> nctExistingCartItem = nctCartItemRepository.findByNctUserAndNctProduct(nctUser, nctProduct);
+
+        if (nctExistingCartItem.isPresent()) {
+            NctCartItem nctCartItem = nctExistingCartItem.get();
+            nctCartItem.setNctQuantity(nctCartItem.getNctQuantity() + nctQuantity);
+            return nctCartItemRepository.save(nctCartItem);
+        } else {
+            NctCartItem nctNewCartItem = new NctCartItem();
+            nctNewCartItem.setNctUser(nctUser);
+            nctNewCartItem.setNctProduct(nctProduct);
+            nctNewCartItem.setNctQuantity(nctQuantity);
+            return nctCartItemRepository.save(nctNewCartItem);
+        }
+    }
+
+    public void nctUpdateCartItemQuantity(Long nctCartItemId, Integer nctQuantity) {
+        Optional<NctCartItem> nctCartItemOpt = nctCartItemRepository.findById(nctCartItemId);
+        if (nctCartItemOpt.isPresent()) {
+            NctCartItem nctCartItem = nctCartItemOpt.get();
+            nctCartItem.setNctQuantity(nctQuantity);
+            nctCartItemRepository.save(nctCartItem);
+        }
+    }
+
+    public void nctRemoveFromCart(Long nctCartItemId) {
+        nctCartItemRepository.deleteById(nctCartItemId);
+    }
+
+    public void nctClearCart(NctUser nctUser) {
+        nctCartItemRepository.deleteByNctUserId(nctUser.getNctUserId());
+    }
+
+    public Integer nctGetCartItemCount(NctUser nctUser) {
+        return nctCartItemRepository.countNctCartItemsByNctUser(nctUser.getNctUserId());
+    }
+
+    public Double nctCalculateCartTotal(NctUser nctUser) {
+        List<NctCartItem> nctCartItems = nctGetCartItems(nctUser);
+        return nctCartItems.stream()
+                .mapToDouble(item -> item.getNctProduct().getNctPrice().doubleValue() * item.getNctQuantity())
+                .sum();
+    }
+}
