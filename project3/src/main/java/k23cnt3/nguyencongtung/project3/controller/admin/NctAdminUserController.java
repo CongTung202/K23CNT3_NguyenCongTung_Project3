@@ -25,7 +25,18 @@ public class NctAdminUserController {
     @GetMapping
     public String nctUserList(Model model) {
         List<NctUser> nctUsers = nctUserService.nctGetAllUsers();
+
+        // Thống kê
+        long nctAdminCount = nctUsers.stream()
+                .filter(user -> user.getNctRole() == NctUser.NctRole.ADMIN)
+                .count();
+        long nctUserCount = nctUsers.stream()
+                .filter(user -> user.getNctRole() == NctUser.NctRole.USER)
+                .count();
+
         model.addAttribute("nctUsers", nctUsers);
+        model.addAttribute("nctAdminCount", nctAdminCount);
+        model.addAttribute("nctUserCount", nctUserCount);
         model.addAttribute("nctPageTitle", "Quản lý Người dùng - Admin");
         return "admin/users/nct-user-list";
     }
@@ -37,8 +48,10 @@ public class NctAdminUserController {
             return "redirect:/admin/users";
         }
 
-        model.addAttribute("nctUser", nctUserOpt.get());
-        model.addAttribute("nctPageTitle", "Chi tiết Người dùng - Admin");
+        NctUser nctUser = nctUserOpt.get();
+        model.addAttribute("nctUser", nctUser);
+        model.addAttribute("nctOrderCount", nctUser.getNctOrderCount());
+        model.addAttribute("nctPageTitle", "Chi tiết Người dùng - " + nctUser.getNctFullName());
         return "admin/users/nct-user-view";
     }
 
@@ -50,6 +63,7 @@ public class NctAdminUserController {
         }
 
         model.addAttribute("nctUser", nctUserOpt.get());
+        model.addAttribute("nctRoles", NctUser.NctRole.values());
         model.addAttribute("nctPageTitle", "Chỉnh sửa Người dùng - Admin");
         return "admin/users/nct-user-edit";
     }
@@ -74,6 +88,7 @@ public class NctAdminUserController {
             nctExistingUser.setNctPhone(nctUser.getNctPhone());
             nctExistingUser.setNctAddress(nctUser.getNctAddress());
             nctExistingUser.setNctRole(NctUser.NctRole.valueOf(nctRole));
+            nctExistingUser.setNctUpdatedAt(java.time.LocalDateTime.now());
 
             nctUserService.nctSaveUser(nctExistingUser);
             nctRedirectAttributes.addFlashAttribute("nctSuccess", "Cập nhật người dùng thành công!");
@@ -92,26 +107,27 @@ public class NctAdminUserController {
             return "redirect:/admin/users";
         }
 
-        model.addAttribute("nctUser", nctUserOpt.get());
-        model.addAttribute("nctPageTitle", "Xóa Người dùng - Admin");
+        NctUser nctUser = nctUserOpt.get();
+        model.addAttribute("nctUser", nctUser);
+        model.addAttribute("nctOrderCount", nctUser.getNctOrderCount());
+        model.addAttribute("nctPageTitle", "Xóa Người dùng - " + nctUser.getNctFullName());
         return "admin/users/nct-user-delete";
     }
 
     @PostMapping("/delete/{id}")
     public String nctDeleteUser(@PathVariable Long id, RedirectAttributes nctRedirectAttributes) {
         try {
-            // Kiểm tra xem user có đơn hàng không trước khi xóa
             Optional<NctUser> nctUserOpt = nctUserService.nctGetUserById(id);
             if (nctUserOpt.isPresent()) {
                 NctUser nctUser = nctUserOpt.get();
                 if (nctUser.getNctOrders() != null && !nctUser.getNctOrders().isEmpty()) {
                     nctRedirectAttributes.addFlashAttribute("nctError",
-                            "Không thể xóa người dùng vì có đơn hàng liên quan!");
+                            "Không thể xóa người dùng vì có " + nctUser.getNctOrders().size() + " đơn hàng liên quan!");
                     return "redirect:/admin/users";
                 }
 
                 nctUserService.nctDeleteUser(id);
-                nctRedirectAttributes.addFlashAttribute("nctSuccess", "Xóa người dùng thành công!");
+                nctRedirectAttributes.addFlashAttribute("nctSuccess", "Xóa người dùng " + nctUser.getNctFullName() + " thành công!");
             }
         } catch (Exception e) {
             nctRedirectAttributes.addFlashAttribute("nctError", "Lỗi khi xóa người dùng: " + e.getMessage());

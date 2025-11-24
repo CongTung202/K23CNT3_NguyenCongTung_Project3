@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Chi tiết Người dùng - Admin</title>
+    <title th:text="${nctPageTitle}">Chi tiết Người dùng - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -22,6 +22,11 @@
             background: rgba(255,255,255,0.1);
             border-left: 4px solid #fff;
         }
+        .nct-user-profile {
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        }
         .nct-user-avatar-large {
             width: 120px;
             height: 120px;
@@ -32,21 +37,18 @@
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin: 0 auto;
         }
         .nct-info-card {
             border: none;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            transition: all 0.3s ease;
         }
-        .nct-info-section {
-            border-left: 4px solid #667eea;
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .nct-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
     </style>
 </head>
@@ -88,169 +90,135 @@
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 class="h3 text-dark">
-                        <i class="fas fa-user me-2 text-primary"></i>Chi tiết Người dùng
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-user me-2"></i>Chi tiết Người dùng
                     </h1>
-                    <p class="text-muted mb-0">Thông tin chi tiết về người dùng</p>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/users">Người dùng</a></li>
+                            <li class="breadcrumb-item active" th:text="${nctUser.nctFullName}"></li>
+                        </ol>
+                    </nav>
                 </div>
                 <div>
-                    <a th:href="@{/admin/users/edit/{id}(id=${nctUser.nctUserId})}"
-                       class="btn btn-warning me-2">
-                        <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                    <a href="/admin/users" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
                     </a>
-                    <a href="/admin/users" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Quay lại
+                    <a th:href="@{/admin/users/edit/{id}(id=${nctUser.nctUserId})}" class="btn btn-warning me-2">
+                        <i class="fas fa-edit me-1"></i> Chỉnh sửa
+                    </a>
+                    <a th:href="@{/admin/users/delete/{id}(id=${nctUser.nctUserId})}" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i> Xóa
                     </a>
                 </div>
             </div>
 
-            <!-- User Details -->
+            <!-- Alert Messages -->
+            <div th:if="${nctSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${nctSuccess}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${nctError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${nctError}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- User Profile -->
             <div class="row">
-                <!-- Profile Section -->
-                <div class="col-md-4 mb-4">
-                    <div class="card nct-info-card h-100">
-                        <div class="card-body text-center">
-                            <div class="nct-user-avatar-large mb-3">
-                                <span th:text="${nctUser.nctFullName?.substring(0,1) ?: nctUser.nctUsername?.substring(0,1)}"></span>
+                <div class="col-lg-4">
+                    <div class="card nct-user-profile p-4 text-center mb-4">
+                        <div class="nct-user-avatar-large mb-3">
+                            <span th:text="${nctUser.nctInitials}"></span>
+                        </div>
+                        <h3 th:text="${nctUser.nctFullName ?: nctUser.nctUsername}"></h3>
+                        <p class="text-muted" th:text="'@' + ${nctUser.nctUsername}"></p>
+                        <div class="mb-3">
+                            <span th:if="${nctUser.nctRole == 'ADMIN'}"
+                                  class="badge bg-danger fs-6 p-2">Quản trị viên</span>
+                            <span th:if="${nctUser.nctRole == 'USER'}"
+                                  class="badge bg-success fs-6 p-2">Người dùng</span>
+                        </div>
+                        <div class="row text-center mt-4">
+                            <div class="col-6">
+                                <h4 th:text="${nctOrderCount}">0</h4>
+                                <small class="text-muted">Đơn hàng</small>
                             </div>
-                            <h4 class="text-dark mb-2" th:text="${nctUser.nctFullName ?: nctUser.nctUsername}"></h4>
-                            <p class="text-muted mb-3" th:text="'@' + ${nctUser.nctUsername}"></p>
-
-                            <div th:if="${nctUser.nctRole == 'ADMIN'}"
-                                 class="badge bg-danger fs-6 mb-3">Quản trị viên</div>
-                            <div th:if="${nctUser.nctRole == 'USER'}"
-                                 class="badge bg-success fs-6 mb-3">Người dùng</div>
-
-                            <div class="mt-4">
-                                <div class="row text-center">
-                                    <div class="col-6">
-                                        <h5 class="text-primary" th:text="${nctUser.nctOrders?.size() ?: 0}">0</h5>
-                                        <small class="text-muted">Đơn hàng</small>
-                                    </div>
-                                    <div class="col-6">
-                                        <h5 class="text-success" th:text="${nctDaysRegistered}">0</h5>
-                                        <small class="text-muted">Ngày tham gia</small>
-                                    </div>
-                                </div>
+                            <div class="col-6">
+                                <h4 th:text="${#temporals.format(nctUser.nctCreatedAt, 'dd/MM/yyyy')}"></h4>
+                                <small class="text-muted">Ngày tham gia</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Info Section -->
-                <div class="col-md-8">
-                    <div class="card nct-info-card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title text-dark mb-4">
+                <div class="col-lg-8">
+                    <!-- Thông tin cá nhân -->
+                    <div class="card nct-info-card mb-4">
+                        <div class="card-header bg-transparent">
+                            <h5 class="card-title mb-0">
                                 <i class="fas fa-info-circle me-2 text-primary"></i>Thông tin cá nhân
                             </h5>
-
-                            <div class="nct-info-section">
-                                <h6 class="text-primary mb-3">Thông tin cơ bản</h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p><strong>Username:</strong> <span th:text="${nctUser.nctUsername}"></span></p>
-                                        <p><strong>Email:</strong> <span th:text="${nctUser.nctEmail}"></span></p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Họ tên:</strong> <span th:text="${nctUser.nctFullName ?: 'Chưa cập nhật'}"></span></p>
-                                        <p><strong>Số điện thoại:</strong> <span th:text="${nctUser.nctPhone ?: 'Chưa cập nhật'}"></span></p>
-                                    </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Họ và tên</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctFullName ?: 'Chưa cập nhật'}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Tên đăng nhập</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctUsername}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Email</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctEmail}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Số điện thoại</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctPhone ?: 'Chưa cập nhật'}"></p>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label text-muted">Địa chỉ</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctAddress ?: 'Chưa cập nhật'}"></p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="nct-info-section">
-                                <h6 class="text-primary mb-3">Địa chỉ</h6>
-                                <p th:if="${nctUser.nctAddress}" th:text="${nctUser.nctAddress}"></p>
-                                <p th:unless="${nctUser.nctAddress}" class="text-muted fst-italic">Chưa cập nhật địa chỉ</p>
-                            </div>
-
-                            <div class="nct-info-section">
-                                <h6 class="text-primary mb-3">Thông tin tài khoản</h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p><strong>Ngày đăng ký:</strong>
-                                            <span th:text="${#temporals.format(nctUser.nctCreatedAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Cập nhật lần cuối:</strong>
-                                            <span th:text="${#temporals.format(nctUser.nctUpdatedAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                        </p>
-                                    </div>
+                    <!-- Thông tin hệ thống -->
+                    <div class="card nct-info-card">
+                        <div class="card-header bg-transparent">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-cog me-2 text-secondary"></i>Thông tin hệ thống
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">ID người dùng</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctUserId}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Vai trò</label>
+                                    <p class="fw-bold">
+                                        <span th:if="${nctUser.nctRole == 'ADMIN'}">Quản trị viên</span>
+                                        <span th:if="${nctUser.nctRole == 'USER'}">Người dùng</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Ngày đăng ký</label>
+                                    <p class="fw-bold" th:text="${#temporals.format(nctUser.nctCreatedAt, 'dd/MM/yyyy HH:mm')}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Cập nhật lần cuối</label>
+                                    <p class="fw-bold" th:text="${#temporals.format(nctUser.nctUpdatedAt, 'dd/MM/yyyy HH:mm')}"></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Recent Orders -->
-            <div class="card nct-info-card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title text-dark mb-4">
-                        <i class="fas fa-shopping-cart me-2 text-warning"></i>Đơn hàng gần đây
-                        <span class="badge bg-primary ms-2" th:text="${nctUser.nctOrders?.size() ?: 0}">0</span>
-                    </h5>
-
-                    <div th:if="${nctUser.nctOrders != null && !nctUser.nctOrders.isEmpty()}">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                <tr>
-                                    <th>Mã đơn</th>
-                                    <th>Ngày đặt</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Trạng thái</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="order : ${nctUser.nctOrders}">
-                                    <td th:text="'#' + ${order.nctOrderId}"></td>
-                                    <td th:text="${#temporals.format(order.nctCreatedAt, 'dd/MM/yyyy')}"></td>
-                                    <td th:text="'₫' + ${#numbers.formatDecimal(order.nctTotalAmount, 0, 'COMMA', 0, 'POINT')}"></td>
-                                    <td>
-                                                <span th:switch="${order.nctStatus}">
-                                                    <span th:case="PENDING" class="badge bg-warning">Chờ xử lý</span>
-                                                    <span th:case="CONFIRMED" class="badge bg-info">Đã xác nhận</span>
-                                                    <span th:case="SHIPPING" class="badge bg-primary">Đang giao</span>
-                                                    <span th:case="DELIVERED" class="badge bg-success">Đã giao</span>
-                                                    <span th:case="CANCELLED" class="badge bg-danger">Đã hủy</span>
-                                                </span>
-                                    </td>
-                                    <td>
-                                        <a th:href="@{/admin/orders/view/{id}(id=${order.nctOrderId})}"
-                                           class="btn btn-sm btn-outline-info">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div th:if="${nctUser.nctOrders == null || nctUser.nctOrders.isEmpty()}"
-                         class="text-center text-muted py-4">
-                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
-                        <p class="mb-0">Người dùng chưa có đơn hàng nào</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="text-center mt-4">
-                <a th:href="@{/admin/users/edit/{id}(id=${nctUser.nctUserId})}"
-                   class="btn btn-warning me-3">
-                    <i class="fas fa-edit me-2"></i>Chỉnh sửa
-                </a>
-                <a th:href="@{/admin/users/delete/{id}(id=${nctUser.nctUserId})}"
-                   class="btn btn-danger me-3">
-                    <i class="fas fa-trash me-2"></i>Xóa
-                </a>
-                <a href="/admin/users" class="btn btn-outline-secondary">
-                    <i class="fas fa-list me-2"></i>Danh sách người dùng
-                </a>
             </div>
         </main>
     </div>
