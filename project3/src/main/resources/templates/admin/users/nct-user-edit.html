@@ -141,14 +141,19 @@
                                           rows="3" placeholder="Nhập địa chỉ"></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nctRole" class="form-label">Vai trò</label>
+                                <label for="nctRole" class="form-label">Vai trò <span class="text-danger">*</span></label>
                                 <select class="form-select" id="nctRole" name="nctRole" required>
+                                    <option value="">-- Chọn vai trò --</option>
                                     <option th:each="role : ${nctRoles}"
-                                            th:value="${role}"
-                                            th:text="${role == 'ADMIN' ? 'Quản trị viên' : 'Người dùng'}"
+                                            th:value="${role.name()}"
+                                            th:text="${role == T(k23cnt3.nguyencongtung.project3.entity.NctUser.NctRole).ADMIN ? 'Quản trị viên' : 'Người dùng'}"
                                             th:selected="${nctUser.nctRole == role}">
                                     </option>
                                 </select>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Quản trị viên có toàn quyền truy cập hệ thống
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Ngày đăng ký</label>

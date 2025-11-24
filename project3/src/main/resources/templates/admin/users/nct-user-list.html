@@ -188,10 +188,14 @@
                                 <td th:text="${user.nctEmail}"></td>
                                 <td th:text="${user.nctPhone ?: 'Chưa cập nhật'}"></td>
                                 <td>
-                                            <span th:if="${user.nctRole == 'ADMIN'}"
-                                                  class="nct-role-badge bg-danger text-white">Quản trị</span>
-                                    <span th:if="${user.nctRole == 'USER'}"
-                                          class="nct-role-badge bg-success text-white">Người dùng</span>
+    <span th:if="${user.nctRole == T(k23cnt3.nguyencongtung.project3.entity.NctUser.NctRole).ADMIN}"
+          class="nct-role-badge bg-danger text-white">
+        <i class="fas fa-crown me-1"></i>Quản trị
+    </span>
+                                    <span th:if="${user.nctRole == T(k23cnt3.nguyencongtung.project3.entity.NctUser.NctRole).USER}"
+                                          class="nct-role-badge bg-success text-white">
+        <i class="fas fa-user me-1"></i>Người dùng
+    </span>
                                 </td>
                                 <td th:text="${#temporals.format(user.nctCreatedAt, 'dd/MM/yyyy')}"></td>
                                 <td>

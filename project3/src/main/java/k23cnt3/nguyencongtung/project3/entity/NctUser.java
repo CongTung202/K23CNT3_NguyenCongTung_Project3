@@ -34,8 +34,9 @@ public class NctUser {
     @Column(name = "nct_address")
     private String nctAddress;
 
+    // Sửa lại để khớp với ENUM trong database
     @Enumerated(EnumType.STRING)
-    @Column(name = "nct_role")
+    @Column(name = "nct_role", columnDefinition = "ENUM('ADMIN', 'USER')")
     private NctRole nctRole = NctRole.USER;
 
     @Column(name = "nct_created_at")
@@ -44,7 +45,6 @@ public class NctUser {
     @Column(name = "nct_updated_at")
     private LocalDateTime nctUpdatedAt = LocalDateTime.now();
 
-    // QUAN TRỌNG: Thêm relationship với orders
     @OneToMany(mappedBy = "nctUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<NctOrder> nctOrders = new ArrayList<>();
 
@@ -54,20 +54,19 @@ public class NctUser {
     @OneToMany(mappedBy = "nctUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<NctWishlist> nctWishlistItems = new ArrayList<>();
 
+    // Enum phải khớp với database
     public enum NctRole {
         ADMIN, USER
     }
-    public List<NctOrder> getNctOrders() {
-        return nctOrders;
-    }
 
-    public void setNctOrders(List<NctOrder> nctOrders) {
-        this.nctOrders = nctOrders;
-    }
+    // Constructor mặc định
     public NctUser() {
     }
 
-    public NctUser(Long nctUserId, String nctUsername, String nctEmail, String nctFullName, String nctPassword, String nctPhone, String nctAddress, NctRole nctRole, LocalDateTime nctCreatedAt, LocalDateTime nctUpdatedAt) {
+    // Constructor đầy đủ
+    public NctUser(Long nctUserId, String nctUsername, String nctEmail, String nctFullName,
+                   String nctPassword, String nctPhone, String nctAddress,
+                   NctRole nctRole, LocalDateTime nctCreatedAt, LocalDateTime nctUpdatedAt) {
         this.nctUserId = nctUserId;
         this.nctUsername = nctUsername;
         this.nctEmail = nctEmail;
@@ -80,6 +79,7 @@ public class NctUser {
         this.nctUpdatedAt = nctUpdatedAt;
     }
 
+    // Getter và Setter
     public Long getNctUserId() {
         return nctUserId;
     }
@@ -159,7 +159,16 @@ public class NctUser {
     public void setNctUpdatedAt(LocalDateTime nctUpdatedAt) {
         this.nctUpdatedAt = nctUpdatedAt;
     }
-    // Thêm method tiện ích nếu cần
+
+    public List<NctOrder> getNctOrders() {
+        return nctOrders;
+    }
+
+    public void setNctOrders(List<NctOrder> nctOrders) {
+        this.nctOrders = nctOrders;
+    }
+
+    // Thêm method tiện ích
     @Transient
     public int getNctOrderCount() {
         return nctOrders != null ? nctOrders.size() : 0;
@@ -173,5 +182,29 @@ public class NctUser {
             return nctUsername.substring(0, 1).toUpperCase();
         }
         return "U";
+    }
+
+    // Method tiện ích để hiển thị tên vai trò
+    @Transient
+    public String getNctRoleDisplayName() {
+        switch (this.nctRole) {
+            case ADMIN:
+                return "Quản trị viên";
+            case USER:
+                return "Người dùng";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    // Method tiện ích để kiểm tra vai trò
+    @Transient
+    public boolean isNctAdmin() {
+        return this.nctRole == NctRole.ADMIN;
+    }
+
+    @Transient
+    public boolean isNctUser() {
+        return this.nctRole == NctRole.USER;
     }
 }

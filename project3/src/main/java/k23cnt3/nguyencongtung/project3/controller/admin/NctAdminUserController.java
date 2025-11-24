@@ -72,7 +72,7 @@ public class NctAdminUserController {
     public String nctUpdateUser(
             @PathVariable Long id,
             @ModelAttribute NctUser nctUser,
-            @RequestParam String nctRole,
+            @RequestParam("nctRole") String nctRole,
             RedirectAttributes nctRedirectAttributes) {
 
         try {
@@ -83,11 +83,22 @@ public class NctAdminUserController {
             }
 
             NctUser nctExistingUser = nctExistingUserOpt.get();
+
+            // Cập nhật thông tin cơ bản
             nctExistingUser.setNctFullName(nctUser.getNctFullName());
             nctExistingUser.setNctEmail(nctUser.getNctEmail());
             nctExistingUser.setNctPhone(nctUser.getNctPhone());
             nctExistingUser.setNctAddress(nctUser.getNctAddress());
-            nctExistingUser.setNctRole(NctUser.NctRole.valueOf(nctRole));
+
+            // Cập nhật role - xử lý enum đúng cách
+            try {
+                NctUser.NctRole role = NctUser.NctRole.valueOf(nctRole);
+                nctExistingUser.setNctRole(role);
+            } catch (IllegalArgumentException e) {
+                nctRedirectAttributes.addFlashAttribute("nctError", "Vai trò không hợp lệ!");
+                return "redirect:/admin/users/edit/" + id;
+            }
+
             nctExistingUser.setNctUpdatedAt(java.time.LocalDateTime.now());
 
             nctUserService.nctSaveUser(nctExistingUser);
