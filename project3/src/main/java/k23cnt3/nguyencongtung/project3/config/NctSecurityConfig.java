@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -14,23 +15,36 @@ import org.springframework.security.web.SecurityFilterChain;
 public class NctSecurityConfig {
 
     @Bean
-    public PasswordEncoder nctPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        // Use NoOpPasswordEncoder for plain text passwords
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
-    public SecurityFilterChain nctSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // SỬA Ở ĐÂY: Dùng authorizeHttpRequests thay vì authorizeRequests
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // Cho phép tất cả truy cập
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**", "/", "/products/**").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
                 )
-                // Cú pháp disable CSRF chuẩn cho Spring Security 6.1+
-                .csrf(AbstractHttpConfigurer::disable)
-                // Hoặc viết kiểu lambda: .csrf(csrf -> csrf.disable())
-
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/auth/login?error=true")
+                        .permitAll()
+                )
+                .rememberMe(rememberMe -> rememberMe
+                        .key("a-unique-and-secret-key-for-hashing") // Change this to a secret key
+                        .tokenValiditySeconds(86400 * 7) // 7 days
+                        .rememberMeParameter("remember-me")
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout=true")
+                        .permitAll()
+                );
 
         return http.build();
     }

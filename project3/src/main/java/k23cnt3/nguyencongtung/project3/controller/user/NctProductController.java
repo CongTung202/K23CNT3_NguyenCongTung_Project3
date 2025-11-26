@@ -1,8 +1,9 @@
 package k23cnt3.nguyencongtung.project3.controller.user;
 
+import k23cnt3.nguyencongtung.project3.entity.NctCategory;
 import k23cnt3.nguyencongtung.project3.entity.NctProduct;
-import k23cnt3.nguyencongtung.project3.service.NctProductService;
 import k23cnt3.nguyencongtung.project3.service.NctCategoryService;
+import k23cnt3.nguyencongtung.project3.service.NctProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,24 +32,30 @@ public class NctProductController {
     public String nctProductsPage(
             @RequestParam(value = "category", required = false) Long nctCategoryId,
             @RequestParam(value = "search", required = false) String nctSearchKeyword,
-            @RequestParam(value = "minPrice", required = false) Double nctMinPrice,
-            @RequestParam(value = "maxPrice", required = false) Double nctMaxPrice,
             Model model) {
 
         List<NctProduct> nctProducts;
+        String nctHeaderTitle = "Tất cả sản phẩm";
 
         if (nctSearchKeyword != null && !nctSearchKeyword.isEmpty()) {
-            nctProducts = nctProductService.nctSearchProducts(nctSearchKeyword);
+            nctProducts = nctProductService.nctSearchActiveProducts(nctSearchKeyword);
             model.addAttribute("nctSearchKeyword", nctSearchKeyword);
-        } else if (nctMinPrice != null && nctMaxPrice != null) {
-            nctProducts = nctProductService.nctGetProductsByPriceRange(nctMinPrice, nctMaxPrice);
+            nctHeaderTitle = "Kết quả cho '" + nctSearchKeyword + "'";
+        } else if (nctCategoryId != null) {
+            nctProducts = nctProductService.nctGetActiveProductsByCategoryId(nctCategoryId);
+            Optional<NctCategory> categoryOpt = nctCategoryService.nctGetCategoryById(nctCategoryId);
+            if (categoryOpt.isPresent()) {
+                nctHeaderTitle = categoryOpt.get().getNctCategoryName();
+            }
+            model.addAttribute("nctSelectedCategoryId", nctCategoryId);
         } else {
             nctProducts = nctProductService.nctGetActiveProducts();
         }
 
         model.addAttribute("nctProducts", nctProducts);
-        model.addAttribute("nctCategories", nctCategoryService.nctGetAllCategories());
-        model.addAttribute("nctPageTitle", "Sản phẩm - NCT Otaku Store");
+        model.addAttribute("nctCategories", nctCategoryService.nctGetCategoriesWithActiveProducts());
+        model.addAttribute("nctHeaderTitle", nctHeaderTitle);
+        model.addAttribute("nctPageTitle", nctHeaderTitle + " - UMACT Store");
 
         return "user/nct-products";
     }
@@ -60,8 +67,10 @@ public class NctProductController {
         if (nctProductOpt.isPresent()) {
             NctProduct nctProduct = nctProductOpt.get();
             model.addAttribute("nctProduct", nctProduct);
-            model.addAttribute("nctRelatedProducts", nctProductService.nctGetProductsByCategory(nctProduct.getNctCategory()));
-            model.addAttribute("nctPageTitle", nctProduct.getNctProductName() + " - NCT Otaku Store");
+            if (nctProduct.getNctCategory() != null) {
+                model.addAttribute("nctRelatedProducts", nctProductService.nctGetActiveProductsByCategory(nctProduct.getNctCategory()));
+            }
+            model.addAttribute("nctPageTitle", nctProduct.getNctProductName() + " - UMACT Store");
             return "user/nct-product-detail";
         }
 
