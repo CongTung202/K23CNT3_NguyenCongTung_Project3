@@ -179,9 +179,13 @@
                                     <label class="form-label text-muted">Số điện thoại</label>
                                     <p class="fw-bold" th:text="${nctUser.nctPhone ?: 'Chưa cập nhật'}"></p>
                                 </div>
-                                <div class="col-12 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted">Địa chỉ</label>
                                     <p class="fw-bold" th:text="${nctUser.nctAddress ?: 'Chưa cập nhật'}"></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Mật khẩu</label>
+                                    <p class="fw-bold" th:text="${nctUser.nctPassword ?: 'Chưa cập nhật'}"></p>
                                 </div>
                             </div>
                         </div>

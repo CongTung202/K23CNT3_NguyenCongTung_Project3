@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class NctOrderService {
+public class NctOrderService implements NctOrderServiceInterface {
     private final NctOrderRepository nctOrderRepository;
     private final NctOrderItemRepository nctOrderItemRepository;
     private final NctCartService nctCartService;
@@ -31,18 +31,22 @@ public class NctOrderService {
         this.nctProductService = nctProductService;
     }
 
+    @Override
     public List<NctOrder> nctGetAllOrders() {
         return nctOrderRepository.findAllByOrderByNctCreatedAtDesc();
     }
 
+    @Override
     public List<NctOrder> nctGetUserOrders(NctUser nctUser) {
         return nctOrderRepository.findByNctUser(nctUser);
     }
 
+    @Override
     public Optional<NctOrder> nctGetOrderById(Long nctOrderId) {
         return nctOrderRepository.findById(nctOrderId);
     }
 
+    @Override
     public NctOrder nctCreateOrder(NctUser nctUser, String nctShippingAddress, String nctPhone,
                                    NctOrder.NctPaymentMethod nctPaymentMethod) {
         // Lấy giỏ hàng của user
@@ -93,6 +97,7 @@ public class NctOrderService {
         return nctSavedOrder;
     }
 
+    @Override
     public NctOrder nctUpdateOrderStatus(Long nctOrderId, NctOrder.NctOrderStatus nctStatus) {
         Optional<NctOrder> nctOrderOpt = nctOrderRepository.findById(nctOrderId);
         if (nctOrderOpt.isPresent()) {
@@ -104,13 +109,15 @@ public class NctOrderService {
         throw new RuntimeException("Đơn hàng không tồn tại");
     }
 
+    @Override
     public void nctCancelOrder(Long nctOrderId) {
         Optional<NctOrder> nctOrderOpt = nctOrderRepository.findById(nctOrderId);
         if (nctOrderOpt.isPresent()) {
             NctOrder nctOrder = nctOrderOpt.get();
 
-            // Chỉ cho phép hủy đơn hàng ở trạng thái PENDING
-            if (nctOrder.getNctStatus() != NctOrder.NctOrderStatus.PENDING) {
+            // Chỉ cho phép hủy đơn hàng ở trạng thái PENDING hoặc CONFIRMED
+            if (nctOrder.getNctStatus() != NctOrder.NctOrderStatus.PENDING &&
+                    nctOrder.getNctStatus() != NctOrder.NctOrderStatus.CONFIRMED) {
                 throw new RuntimeException("Không thể hủy đơn hàng ở trạng thái hiện tại");
             }
 
@@ -124,19 +131,93 @@ public class NctOrderService {
             nctOrder.setNctStatus(NctOrder.NctOrderStatus.CANCELLED);
             nctOrder.setNctUpdatedAt(LocalDateTime.now());
             nctOrderRepository.save(nctOrder);
+        } else {
+            throw new RuntimeException("Đơn hàng không tồn tại");
         }
     }
 
+    @Override
     public Long nctGetOrderCountByStatus(NctOrder.NctOrderStatus nctStatus) {
         return nctOrderRepository.countByNctStatus(nctStatus);
     }
 
+    @Override
     public Double nctGetTotalRevenue() {
         Double revenue = nctOrderRepository.getTotalRevenue();
         return revenue != null ? revenue : 0.0;
     }
 
+    @Override
     public List<Object[]> nctGetBestSellingProducts() {
         return nctOrderItemRepository.findBestSellingProducts();
+    }
+
+    // Thêm các phương thức mới
+    @Override
+    public NctOrder nctSaveOrder(NctOrder order) {
+        order.setNctUpdatedAt(LocalDateTime.now());
+        return nctOrderRepository.save(order);
+    }
+
+    @Override
+    public void nctDeleteOrder(Long orderId) {
+        Optional<NctOrder> nctOrderOpt = nctOrderRepository.findById(orderId);
+        if (nctOrderOpt.isPresent()) {
+            NctOrder nctOrder = nctOrderOpt.get();
+
+            // Kiểm tra trạng thái đơn hàng trước khi xóa
+            if (nctOrder.getNctStatus() == NctOrder.NctOrderStatus.DELIVERED ||
+                    nctOrder.getNctStatus() == NctOrder.NctOrderStatus.SHIPPING) {
+                throw new RuntimeException("Không thể xóa đơn hàng đã giao hoặc đang giao");
+            }
+
+            // Hoàn trả số lượng tồn kho nếu đơn hàng chưa bị hủy
+            if (nctOrder.getNctStatus() != NctOrder.NctOrderStatus.CANCELLED) {
+                for (NctOrderItem nctOrderItem : nctOrder.getNctOrderItems()) {
+                    NctProduct nctProduct = nctOrderItem.getNctProduct();
+                    nctProduct.setNctStockQuantity(nctProduct.getNctStockQuantity() + nctOrderItem.getNctQuantity());
+                    nctProductService.nctSaveProduct(nctProduct);
+                }
+            }
+
+            nctOrderRepository.deleteById(orderId);
+        } else {
+            throw new RuntimeException("Đơn hàng không tồn tại");
+        }
+    }
+
+    @Override
+    public List<NctOrder> nctGetOrdersByStatus(NctOrder.NctOrderStatus status) {
+        return nctOrderRepository.findByNctStatusOrderByNctCreatedAtDesc(status);
+    }
+
+    // Thêm phương thức tiện ích
+    public List<NctOrder> nctGetOrdersByUserId(Long userId) {
+        return nctOrderRepository.findByNctUser_NctUserIdOrderByNctCreatedAtDesc(userId);
+    }
+
+    // Thống kê đơn hàng theo tháng
+    public List<Object[]> nctGetMonthlyOrderStats() {
+        return nctOrderRepository.getMonthlyOrderStats();
+    }
+
+    // Cập nhật thông tin đơn hàng
+    public NctOrder nctUpdateOrderInfo(Long orderId, String shippingAddress, String phone) {
+        Optional<NctOrder> nctOrderOpt = nctOrderRepository.findById(orderId);
+        if (nctOrderOpt.isPresent()) {
+            NctOrder nctOrder = nctOrderOpt.get();
+
+            // Chỉ cho phép cập nhật khi đơn hàng ở trạng thái PENDING
+            if (nctOrder.getNctStatus() != NctOrder.NctOrderStatus.PENDING) {
+                throw new RuntimeException("Chỉ có thể cập nhật đơn hàng ở trạng thái chờ xác nhận");
+            }
+
+            nctOrder.setNctShippingAddress(shippingAddress);
+            nctOrder.setNctPhone(phone);
+            nctOrder.setNctUpdatedAt(LocalDateTime.now());
+
+            return nctOrderRepository.save(nctOrder);
+        }
+        throw new RuntimeException("Đơn hàng không tồn tại");
     }
 }

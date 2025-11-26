@@ -54,7 +54,13 @@ public class NctOrder {
         COD, BANKING
     }
 
-    public NctOrder(Long nctOrderId, NctUser nctUser, NctOrderStatus nctStatus, BigDecimal nctTotalAmount, String nctShippingAddress, NctPaymentMethod nctPaymentMethod, String nctPhone, LocalDateTime nctCreatedAt, LocalDateTime nctUpdatedAt, List<NctOrderItem> nctOrderItems) {
+    // Constructors
+    public NctOrder() {
+    }
+
+    public NctOrder(Long nctOrderId, NctUser nctUser, NctOrderStatus nctStatus, BigDecimal nctTotalAmount,
+                    String nctShippingAddress, NctPaymentMethod nctPaymentMethod, String nctPhone,
+                    LocalDateTime nctCreatedAt, LocalDateTime nctUpdatedAt, List<NctOrderItem> nctOrderItems) {
         this.nctOrderId = nctOrderId;
         this.nctUser = nctUser;
         this.nctStatus = nctStatus;
@@ -67,6 +73,7 @@ public class NctOrder {
         this.nctOrderItems = nctOrderItems;
     }
 
+    // Getter và Setter
     public Long getNctOrderId() {
         return nctOrderId;
     }
@@ -147,8 +154,6 @@ public class NctOrder {
         this.nctOrderItems = nctOrderItems;
     }
 
-    public NctOrder() {
-    }
     // Thêm method tiện ích
     @Transient
     public int getNctItemCount() {
@@ -160,5 +165,52 @@ public class NctOrder {
     @Transient
     public String getNctFormattedTotal() {
         return "₫" + String.format("%,.0f", nctTotalAmount.doubleValue());
+    }
+
+    // Method hiển thị tên trạng thái
+    @Transient
+    public String getNctStatusDisplayName() {
+        switch (this.nctStatus) {
+            case PENDING: return "Chờ xác nhận";
+            case CONFIRMED: return "Đã xác nhận";
+            case SHIPPING: return "Đang giao hàng";
+            case DELIVERED: return "Đã giao hàng";
+            case CANCELLED: return "Đã hủy";
+            default: return "Không xác định";
+        }
+    }
+
+    // Method hiển thị tên phương thức thanh toán
+    @Transient
+    public String getNctPaymentMethodDisplayName() {
+        switch (this.nctPaymentMethod) {
+            case COD: return "Thanh toán khi nhận hàng";
+            case BANKING: return "Chuyển khoản ngân hàng";
+            default: return "Không xác định";
+        }
+    }
+
+    // Method kiểm tra trạng thái
+    @Transient
+    public boolean isNctCancellable() {
+        return this.nctStatus == NctOrderStatus.PENDING || this.nctStatus == NctOrderStatus.CONFIRMED;
+    }
+
+    @Transient
+    public boolean isNctEditable() {
+        return this.nctStatus == NctOrderStatus.PENDING;
+    }
+
+    // Method lấy màu cho trạng thái
+    @Transient
+    public String getNctStatusColor() {
+        switch (this.nctStatus) {
+            case PENDING: return "warning";
+            case CONFIRMED: return "info";
+            case SHIPPING: return "primary";
+            case DELIVERED: return "success";
+            case CANCELLED: return "danger";
+            default: return "secondary";
+        }
     }
 }
