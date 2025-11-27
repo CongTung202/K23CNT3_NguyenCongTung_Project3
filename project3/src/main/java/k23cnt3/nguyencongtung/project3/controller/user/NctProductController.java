@@ -2,9 +2,14 @@ package k23cnt3.nguyencongtung.project3.controller.user;
 
 import k23cnt3.nguyencongtung.project3.entity.NctCategory;
 import k23cnt3.nguyencongtung.project3.entity.NctProduct;
+import k23cnt3.nguyencongtung.project3.entity.NctUser;
+import k23cnt3.nguyencongtung.project3.service.NctCartService;
 import k23cnt3.nguyencongtung.project3.service.NctCategoryService;
 import k23cnt3.nguyencongtung.project3.service.NctProductService;
+import k23cnt3.nguyencongtung.project3.service.NctUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,19 +26,34 @@ public class NctProductController {
 
     private final NctProductService nctProductService;
     private final NctCategoryService nctCategoryService;
+    private final NctCartService nctCartService;
+    private final NctUserService nctUserService;
 
     @Autowired
-    public NctProductController(NctProductService nctProductService, NctCategoryService nctCategoryService) {
+    public NctProductController(NctProductService nctProductService, NctCategoryService nctCategoryService, NctCartService nctCartService, NctUserService nctUserService) {
         this.nctProductService = nctProductService;
         this.nctCategoryService = nctCategoryService;
+        this.nctCartService = nctCartService;
+        this.nctUserService = nctUserService;
+    }
+
+    private void addCommonAttributes(Model model, UserDetails userDetails) {
+        if (userDetails != null) {
+            NctUser currentUser = nctUserService.nctFindByUsername(userDetails.getUsername()).orElse(null);
+            if (currentUser != null) {
+                Integer cartItemCount = nctCartService.nctGetCartItemCount(currentUser);
+                model.addAttribute("nctCartItemCount", cartItemCount != null ? cartItemCount : 0);
+            }
+        }
     }
 
     @GetMapping
     public String nctProductsPage(
             @RequestParam(value = "category", required = false) Long nctCategoryId,
             @RequestParam(value = "search", required = false) String nctSearchKeyword,
-            Model model) {
+            Model model, @AuthenticationPrincipal UserDetails userDetails) {
 
+        addCommonAttributes(model, userDetails);
         List<NctProduct> nctProducts;
         String nctHeaderTitle = "Tất cả sản phẩm";
 
@@ -61,7 +81,8 @@ public class NctProductController {
     }
 
     @GetMapping("/{id}")
-    public String nctProductDetail(@PathVariable("id") Long nctProductId, Model model) {
+    public String nctProductDetail(@PathVariable("id") Long nctProductId, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        addCommonAttributes(model, userDetails);
         Optional<NctProduct> nctProductOpt = nctProductService.nctGetProductById(nctProductId);
 
         if (nctProductOpt.isPresent()) {
