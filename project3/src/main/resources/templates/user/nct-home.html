@@ -330,34 +330,7 @@
 <body>
 <div th:replace="~{fragments/nct-header :: header}"></div>
 
-
-<aside class="sidebar">
-    <a th:href="@{/}" class="sidebar-item">
-        <i class="fas fa-home"></i>
-        <span>Trang chủ</span>
-    </a>
-    <a th:href="@{/products}" class="sidebar-item">
-        <i class="fas fa-cube"></i>
-        <span>Sản phẩm</span>
-    </a>
-    <a th:href="@{/bookmark}" class="sidebar-item">
-        <i class="fas fa-bookmark"></i>
-        <span>Đã lưu</span>
-    </a>
-    <a href="#" class="sidebar-item">
-        <i class="fas fa-eye"></i>
-        <span>Đã xem</span>
-    </a>
-    <hr class="my-3 border-gray-200">
-    <a href="#" class="sidebar-item">
-        <i class="fab fa-facebook"></i>
-        <span>Facebook</span>
-    </a>
-    <a href="#" class="sidebar-item">
-        <i class="fab fa-facebook-messenger"></i>
-        <span>Messenger</span>
-    </a>
-</aside>
+<div th:replace="~{fragments/nct-sidebar :: sidebar(activePage='home')}"></div>
 
 <main class="main-content">
     <div class="banner-slider">

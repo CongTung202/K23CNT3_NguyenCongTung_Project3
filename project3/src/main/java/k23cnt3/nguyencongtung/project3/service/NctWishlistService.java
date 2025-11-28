@@ -1,59 +1,51 @@
 package k23cnt3.nguyencongtung.project3.service;
 
-import k23cnt3.nguyencongtung.project3.entity.NctWishlist;
-import k23cnt3.nguyencongtung.project3.entity.NctUser;
-import k23cnt3.nguyencongtung.project3.entity.NctProduct;
-import k23cnt3.nguyencongtung.project3.repository.NctWishlistRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
+    import k23cnt3.nguyencongtung.project3.entity.NctProduct;
+    import k23cnt3.nguyencongtung.project3.entity.NctUser;
+    import k23cnt3.nguyencongtung.project3.entity.NctWishlist;
+    import k23cnt3.nguyencongtung.project3.repository.NctProductRepository;
+    import k23cnt3.nguyencongtung.project3.repository.NctWishlistRepository;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Service;
+    import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@Transactional
-public class NctWishlistService {
-    private final NctWishlistRepository nctWishlistRepository;
-    private final NctProductService nctProductService;
+    import java.util.List;
+    import java.util.Optional;
 
-    @Autowired
-    public NctWishlistService(NctWishlistRepository nctWishlistRepository, NctProductService nctProductService) {
-        this.nctWishlistRepository = nctWishlistRepository;
-        this.nctProductService = nctProductService;
-    }
-    public List<NctWishlist> nctGetWishlist(NctUser nctUser) {
-        return nctWishlistRepository.findByNctUser(nctUser);
-    }
+    @Service
+    public class NctWishlistService {
 
-    public boolean nctAddToWishlist(NctUser nctUser, Long nctProductId) {
-        Optional<NctProduct> nctProductOpt = nctProductService.nctGetProductById(nctProductId);
-        if (nctProductOpt.isEmpty()) {
+        private final NctWishlistRepository nctWishlistRepository;
+        private final NctProductRepository nctProductRepository;
+
+        @Autowired
+        public NctWishlistService(NctWishlistRepository nctWishlistRepository, NctProductRepository nctProductRepository) {
+            this.nctWishlistRepository = nctWishlistRepository;
+            this.nctProductRepository = nctProductRepository;
+        }
+
+        public List<NctWishlist> nctGetWishlist(NctUser nctUser) {
+            return nctWishlistRepository.findByNctUser(nctUser);
+        }
+
+        @Transactional
+        public boolean nctAddToWishlist(NctUser nctUser, Long nctProductId) {
+            Optional<NctProduct> productOpt = nctProductRepository.findById(nctProductId);
+            if (productOpt.isPresent()) {
+                NctProduct product = productOpt.get();
+                if (!nctWishlistRepository.existsByNctUserAndNctProduct(nctUser, product)) {
+                    NctWishlist wishlistItem = new NctWishlist();
+                    wishlistItem.setNctUser(nctUser);
+                    wishlistItem.setNctProduct(product);
+                    nctWishlistRepository.save(wishlistItem);
+                    return true;
+                }
+            }
             return false;
         }
 
-        NctProduct nctProduct = nctProductOpt.get();
-        if (nctWishlistRepository.existsByNctUserAndNctProduct(nctUser, nctProduct)) {
-            return false; // Đã có trong wishlist
+        @Transactional
+        public void nctRemoveFromWishlist(NctUser nctUser, Long nctProductId) {
+            nctWishlistRepository.deleteByNctUserAndNctProduct_NctProductId(nctUser, nctProductId);
         }
-
-        NctWishlist nctWishlist = new NctWishlist();
-        nctWishlist.setNctUser(nctUser);
-        nctWishlist.setNctProduct(nctProduct);
-        nctWishlistRepository.save(nctWishlist);
-        return true;
     }
-
-    public boolean nctRemoveFromWishlist(NctUser nctUser, Long nctProductId) {
-        nctWishlistRepository.deleteByNctUserAndNctProduct(nctUser.getNctUserId(), nctProductId);
-        return true;
-    }
-
-    public boolean nctIsInWishlist(NctUser nctUser, Long nctProductId) {
-        Optional<NctProduct> nctProductOpt = nctProductService.nctGetProductById(nctProductId);
-        if (nctProductOpt.isEmpty()) {
-            return false;
-        }
-        return nctWishlistRepository.existsByNctUserAndNctProduct(nctUser, nctProductOpt.get());
-    }
-}
