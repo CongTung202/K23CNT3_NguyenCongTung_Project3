@@ -1,47 +1,50 @@
 package k23cnt3.nguyencongtung.project3.service;
 
-import k23cnt3.nguyencongtung.project3.entity.NctOrder;
-import k23cnt3.nguyencongtung.project3.entity.NctUser;
+    import k23cnt3.nguyencongtung.project3.entity.NctOrder;
+    import k23cnt3.nguyencongtung.project3.entity.NctUser;
 
-import java.util.List;
-import java.util.Optional;
+    import java.util.List;
+    import java.util.Optional;
 
-public interface NctOrderServiceInterface {
+    public interface NctOrderServiceInterface {
 
-    // Lấy tất cả đơn hàng
-    List<NctOrder> nctGetAllOrders();
+        // Lấy tất cả đơn hàng
+        List<NctOrder> nctGetAllOrders();
 
-    // Lấy đơn hàng theo user
-    List<NctOrder> nctGetUserOrders(NctUser nctUser);
+        // Lấy đơn hàng theo user
+        List<NctOrder> nctGetUserOrders(NctUser nctUser);
 
-    // Lấy đơn hàng theo ID
-    Optional<NctOrder> nctGetOrderById(Long nctOrderId);
+        // Lấy đơn hàng theo ID
+        Optional<NctOrder> nctGetOrderById(Long nctOrderId);
 
-    // Tạo đơn hàng mới
-    NctOrder nctCreateOrder(NctUser nctUser, String nctShippingAddress, String nctPhone,
-                            NctOrder.NctPaymentMethod nctPaymentMethod);
+        // Tạo đơn hàng mới
+        NctOrder nctCreateOrder(NctUser nctUser, String nctShippingAddress, String nctPhone,
+                                NctOrder.NctPaymentMethod nctPaymentMethod);
 
-    // Cập nhật trạng thái đơn hàng
-    NctOrder nctUpdateOrderStatus(Long nctOrderId, NctOrder.NctOrderStatus nctStatus);
+        // Tạo đơn hàng từ một sản phẩm duy nhất (Mua ngay)
+        NctOrder nctCreateOrderFromSingleProduct(NctUser nctUser, Long nctProductId, Integer nctQuantity, String nctShippingAddress, String nctPhone, NctOrder.NctPaymentMethod nctPaymentMethod);
 
-    // Hủy đơn hàng
-    void nctCancelOrder(Long nctOrderId);
+        // Cập nhật trạng thái đơn hàng
+        NctOrder nctUpdateOrderStatus(Long nctOrderId, NctOrder.NctOrderStatus nctStatus);
 
-    // Đếm đơn hàng theo trạng thái
-    Long nctGetOrderCountByStatus(NctOrder.NctOrderStatus nctStatus);
+        // Hủy đơn hàng
+        void nctCancelOrder(Long nctOrderId);
 
-    // Tính tổng doanh thu
-    Double nctGetTotalRevenue();
+        // Đếm đơn hàng theo trạng thái
+        Long nctGetOrderCountByStatus(NctOrder.NctOrderStatus nctStatus);
 
-    // Lấy sản phẩm bán chạy
-    List<Object[]> nctGetBestSellingProducts();
+        // Tính tổng doanh thu
+        Double nctGetTotalRevenue();
 
-    // Lưu đơn hàng (thêm mới)
-    NctOrder nctSaveOrder(NctOrder order);
+        // Lấy sản phẩm bán chạy
+        List<Object[]> nctGetBestSellingProducts();
 
-    // Xóa đơn hàng (thêm mới)
-    void nctDeleteOrder(Long orderId);
+        // Lưu đơn hàng (thêm mới)
+        NctOrder nctSaveOrder(NctOrder order);
 
-    // Lấy đơn hàng theo trạng thái (thêm mới)
-    List<NctOrder> nctGetOrdersByStatus(NctOrder.NctOrderStatus status);
-}
+        // Xóa đơn hàng (thêm mới)
+        void nctDeleteOrder(Long orderId);
+
+        // Lấy đơn hàng theo trạng thái (thêm mới)
+        List<NctOrder> nctGetOrdersByStatus(NctOrder.NctOrderStatus status);
+    }

@@ -16,12 +16,16 @@ public interface NctCartItemRepository extends JpaRepository<NctCartItem, Long> 
     List<NctCartItem> findByNctUser(NctUser nctUser);
     Optional<NctCartItem> findByNctUserAndNctProduct(NctUser nctUser, NctProduct nctProduct);
 
+    // Add this method to find a cart item by ID and verify ownership
+    Optional<NctCartItem> findByNctCartItemIdAndNctUser(Long nctCartItemId, NctUser nctUser);
+
     @Query("SELECT SUM(ci.nctQuantity) FROM NctCartItem ci WHERE ci.nctUser.nctUserId = :userId")
     Integer countNctCartItemsByNctUser(@Param("userId") Long nctUserId);
 
+    // Add this method to enable clearing the cart
     @Modifying
     @Query("DELETE FROM NctCartItem ci WHERE ci.nctUser.nctUserId = :userId")
-    void deleteByNctUserId(@Param("userId") Long nctUserId);
+    void deleteByNctUserId(@Param("userId") Long userId);
 
     @Modifying
     @Query("DELETE FROM NctCartItem ci WHERE ci.nctUser.nctUserId = :userId AND ci.nctProduct.nctProductId = :productId")

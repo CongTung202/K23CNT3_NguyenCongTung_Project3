@@ -221,7 +221,7 @@
                                                         color: #ff3333;
                                                     }
 
-                                                    .btn-preorder {
+                                                    .btn-buynow {
                                                         flex: 1;
                                                         padding: 14px;
                                                         background-color: #ff3333;
@@ -234,7 +234,7 @@
                                                         transition: all 0.3s ease;
                                                     }
 
-                                                    .btn-preorder:hover {
+                                                    .btn-buynow:hover {
                                                         background-color: #e60000;
                                                     }
 
@@ -420,18 +420,42 @@
 
                                                         <div class="payment-options">
                                                             <h6>Thanh toán</h6>
-                                                            <button class="payment-btn">Toàn bộ</button>
-                                                            <button class="payment-btn">Cọc một phần</button>
+                                                            <button class="payment-btn">Tiền Mặt</button>
+                                                            <button class="payment-btn">Chuyển Khoản</button>
                                                         </div>
 
                                                         <div class="action-buttons">
-                                                            <form th:action="@{/wishlist/add}" method="post">
+                                                            <form id="product-action-form" method="post">
                                                                 <input type="hidden" name="productId" th:value="${nctProduct.nctProductId}" />
-                                                                <button type="submit" class="btn-wishlist" title="Thêm vào yêu thích">
-                                                                    <i class="far fa-heart"></i>
-                                                                </button>
+
+                                                                <!-- Quantity -->
+                                                                <div class="flex items-center mb-4">
+                                                                    <label for="quantity" class="mr-4 font-semibold text-gray-700">Số lượng:</label>
+                                                                    <div class="flex items-center border rounded">
+                                                                        <button type="button" onclick="this.nextElementSibling.stepDown()" class="px-3 py-1 text-gray-600 hover:bg-gray-100">-</button>
+                                                                        <input type="number" id="quantity" name="quantity" value="1" min="1" th:max="${nctProduct.nctStockQuantity}" class="w-16 text-center border-l border-r focus:outline-none">
+                                                                        <button type="button" onclick="this.previousElementSibling.stepUp()" class="px-3 py-1 text-gray-600 hover:bg-gray-100">+</button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Action Buttons -->
+                                                                <div class="flex gap-4">
+                                                                    <!-- Add to Cart Button -->
+                                                                    <button type="submit"
+                                                                            formaction="/cart/add"
+                                                                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors">
+                                                                        <i class="fas fa-cart-plus mr-2"></i>Thêm vào giỏ hàng
+                                                                    </button>
+
+                                                                    <!-- Buy Now Button -->
+                                                                    <button type="submit"
+                                                                            formmethod="get"
+                                                                            formaction="/checkout/buy-now"
+                                                                            class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                                                                        <i class="fas fa-shopping-bag mr-2"></i>Mua ngay
+                                                                    </button>
+                                                                </div>
                                                             </form>
-                                                            <button class="btn-preorder">Pre-order ngay</button>
                                                         </div>
 
                                                         <div class="commitments">

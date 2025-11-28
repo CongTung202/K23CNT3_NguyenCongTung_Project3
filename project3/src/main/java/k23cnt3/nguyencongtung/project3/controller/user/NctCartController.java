@@ -4,6 +4,7 @@ import k23cnt3.nguyencongtung.project3.entity.NctCartItem;
 import k23cnt3.nguyencongtung.project3.entity.NctUser;
 import k23cnt3.nguyencongtung.project3.service.NctCartService;
 import k23cnt3.nguyencongtung.project3.service.NctUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +20,7 @@ import java.util.List;
 public class NctCartController {
 
     private final NctCartService nctCartService;
-    private final NctUserService nctUserService; // Giả định service này đã tồn tại
+    private final NctUserService nctUserService;
 
     @Autowired
     public NctCartController(NctCartService nctCartService, NctUserService nctUserService) {
@@ -31,31 +32,32 @@ public class NctCartController {
         if (userDetails == null) {
             return null;
         }
-        // Giả định bạn có phương thức findByUsername trong NctUserService
         return nctUserService.nctFindByUsername(userDetails.getUsername()).orElse(null);
     }
 
     @GetMapping
-    public String nctViewCart(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String nctShowCart(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         NctUser currentUser = getCurrentUser(userDetails);
         if (currentUser == null) {
             return "redirect:/login";
         }
-
         List<NctCartItem> cartItems = nctCartService.nctGetCartItems(currentUser);
-        Double total = nctCartService.nctCalculateCartTotal(currentUser);
+        double total = nctCartService.nctCalculateCartTotal(currentUser);
 
         model.addAttribute("nctCartItems", cartItems);
         model.addAttribute("nctTotal", total);
-        model.addAttribute("nctPageTitle", "Giỏ hàng - OTAKU.vn");
+        model.addAttribute("nctPageTitle", "Giỏ hàng - UMACT Store");
+        // You will need to create a 'user/nct-cart.html' view for this
         return "user/nct-cart";
     }
 
     @PostMapping("/add")
     public String nctAddToCart(@RequestParam("productId") Long productId,
                                @RequestParam(value = "quantity", defaultValue = "1") Integer quantity,
+                               @RequestParam(value = "redirectTo", required = false) String redirectTo,
                                @AuthenticationPrincipal UserDetails userDetails,
-                               RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes,
+                               HttpServletRequest request) {
         NctUser currentUser = getCurrentUser(userDetails);
         if (currentUser == null) {
             return "redirect:/login";
@@ -68,7 +70,12 @@ public class NctCartController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        return "redirect:/products";
+        if ("checkout".equals(redirectTo)) {
+            return "redirect:/checkout";
+        }
+
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/products");
     }
 
     @PostMapping("/update")
@@ -76,28 +83,35 @@ public class NctCartController {
                                 @RequestParam("quantity") Integer quantity,
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 RedirectAttributes redirectAttributes) {
-        if (getCurrentUser(userDetails) == null) {
+        NctUser currentUser = getCurrentUser(userDetails);
+        if (currentUser == null) {
             return "redirect:/login";
         }
-        if (quantity <= 0) {
-            nctCartService.nctRemoveFromCart(cartItemId);
-            redirectAttributes.addFlashAttribute("successMessage", "Sản phẩm đã được xóa khỏi giỏ hàng.");
-        } else {
-            nctCartService.nctUpdateCartItemQuantity(cartItemId, quantity);
+
+        try {
+            nctCartService.nctUpdateCartItem(currentUser, cartItemId, quantity);
             redirectAttributes.addFlashAttribute("successMessage", "Số lượng sản phẩm đã được cập nhật.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/cart";
     }
 
-    @PostMapping("/remove/{id}")
-    public String nctRemoveFromCart(@PathVariable("id") Long cartItemId,
+    @PostMapping("/remove")
+    public String nctRemoveFromCart(@RequestParam("cartItemId") Long cartItemId,
                                     @AuthenticationPrincipal UserDetails userDetails,
                                     RedirectAttributes redirectAttributes) {
-        if (getCurrentUser(userDetails) == null) {
+        NctUser currentUser = getCurrentUser(userDetails);
+        if (currentUser == null) {
             return "redirect:/login";
         }
-        nctCartService.nctRemoveFromCart(cartItemId);
-        redirectAttributes.addFlashAttribute("successMessage", "Sản phẩm đã được xóa khỏi giỏ hàng.");
+
+        try {
+            nctCartService.nctRemoveFromCart(currentUser, cartItemId);
+            redirectAttributes.addFlashAttribute("successMessage", "Sản phẩm đã được xóa khỏi giỏ hàng.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/cart";
     }
 }
