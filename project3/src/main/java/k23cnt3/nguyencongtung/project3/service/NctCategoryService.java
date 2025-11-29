@@ -5,6 +5,7 @@ import k23cnt3.nguyencongtung.project3.repository.NctCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,5 +96,10 @@ public class NctCategoryService {
             return nctCategoryRepository.save(category);
         }
         return null;
+    }
+    public long countCategoriesCreatedBetween(LocalDateTime start, LocalDateTime end) {
+        return nctGetAllCategories().stream()
+                .filter(c -> c.getNctCreatedAt() != null && !c.getNctCreatedAt().isBefore(start) && c.getNctCreatedAt().isBefore(end))
+                .count();
     }
 }

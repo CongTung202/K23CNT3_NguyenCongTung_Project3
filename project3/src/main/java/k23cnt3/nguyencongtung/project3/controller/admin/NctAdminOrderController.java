@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/orders")
@@ -23,167 +24,115 @@ public class NctAdminOrderController {
     }
 
     @GetMapping
-    public String nctOrderList(Model model) {
-        List<NctOrder> nctOrders = nctOrderService.nctGetAllOrders();
-
-        // Thống kê
-        long nctPendingCount = nctOrders.stream()
-                .filter(order -> order.getNctStatus() == NctOrder.NctOrderStatus.PENDING)
-                .count();
-        long nctConfirmedCount = nctOrders.stream()
-                .filter(order -> order.getNctStatus() == NctOrder.NctOrderStatus.CONFIRMED)
-                .count();
-        long nctShippingCount = nctOrders.stream()
-                .filter(order -> order.getNctStatus() == NctOrder.NctOrderStatus.SHIPPING)
-                .count();
-        long nctDeliveredCount = nctOrders.stream()
-                .filter(order -> order.getNctStatus() == NctOrder.NctOrderStatus.DELIVERED)
-                .count();
-        long nctCancelledCount = nctOrders.stream()
-                .filter(order -> order.getNctStatus() == NctOrder.NctOrderStatus.CANCELLED)
-                .count();
-
-        model.addAttribute("nctOrders", nctOrders);
-        model.addAttribute("nctPendingCount", nctPendingCount);
-        model.addAttribute("nctConfirmedCount", nctConfirmedCount);
-        model.addAttribute("nctShippingCount", nctShippingCount);
-        model.addAttribute("nctDeliveredCount", nctDeliveredCount);
-        model.addAttribute("nctCancelledCount", nctCancelledCount);
-        model.addAttribute("nctPageTitle", "Quản lý Đơn hàng - Admin");
+    public String listOrders(Model model) {
+        List<NctOrder> orders = nctOrderService.nctGetAllOrders();
+        model.addAttribute("nctOrders", orders);
+        model.addAttribute("nctPendingCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.PENDING));
+        model.addAttribute("nctConfirmedCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.CONFIRMED));
+        model.addAttribute("nctShippingCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.SHIPPING));
+        model.addAttribute("nctDeliveredCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.DELIVERED));
+        model.addAttribute("nctCancelledCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.CANCELLED));
         return "admin/orders/nct-order-list";
     }
 
     @GetMapping("/view/{id}")
-    public String nctViewOrder(@PathVariable Long id, Model model) {
-        Optional<NctOrder> nctOrderOpt = nctOrderService.nctGetOrderById(id);
-        if (nctOrderOpt.isEmpty()) {
-            return "redirect:/admin/orders";
+    public String viewOrder(@PathVariable("id") Long orderId, Model model) {
+        Optional<NctOrder> orderOpt = nctOrderService.nctGetOrderById(orderId);
+        if (orderOpt.isPresent()) {
+            model.addAttribute("nctOrder", orderOpt.get());
+            model.addAttribute("nctPageTitle", "Chi tiết Đơn hàng #" + orderId);
+            return "admin/orders/nct-order-view";
         }
-
-        NctOrder nctOrder = nctOrderOpt.get();
-        model.addAttribute("nctOrder", nctOrder);
-        model.addAttribute("nctOrderStatuses", NctOrder.NctOrderStatus.values());
-        model.addAttribute("nctPageTitle", "Chi tiết Đơn hàng #" + nctOrder.getNctOrderId());
-        return "admin/orders/nct-order-view";
+        return "redirect:/admin/orders";
     }
 
     @GetMapping("/edit/{id}")
-    public String nctShowEditForm(@PathVariable Long id, Model model) {
-        Optional<NctOrder> nctOrderOpt = nctOrderService.nctGetOrderById(id);
-        if (nctOrderOpt.isEmpty()) {
-            return "redirect:/admin/orders";
+    public String editOrderForm(@PathVariable("id") Long orderId, Model model) {
+        Optional<NctOrder> orderOpt = nctOrderService.nctGetOrderById(orderId);
+        if (orderOpt.isPresent()) {
+            NctOrder order = orderOpt.get();
+            if (!order.isNctEditable()) {
+                return "redirect:/admin/orders/view/" + orderId;
+            }
+            model.addAttribute("nctOrder", order);
+            model.addAttribute("nctPageTitle", "Chỉnh sửa Đơn hàng #" + orderId);
+            return "admin/orders/nct-order-edit";
         }
-
-        NctOrder nctOrder = nctOrderOpt.get();
-        if (!nctOrder.isNctEditable()) {
-            return "redirect:/admin/orders/view/" + id;
-        }
-
-        model.addAttribute("nctOrder", nctOrder);
-        model.addAttribute("nctPageTitle", "Chỉnh sửa Đơn hàng #" + nctOrder.getNctOrderId());
-        return "admin/orders/nct-order-edit";
+        return "redirect:/admin/orders";
     }
 
     @PostMapping("/edit/{id}")
-    public String nctUpdateOrder(
-            @PathVariable Long id,
-            @ModelAttribute NctOrder nctOrder,
-            RedirectAttributes nctRedirectAttributes) {
-
+    public String updateOrder(@PathVariable("id") Long orderId, @ModelAttribute("nctOrder") NctOrder orderDetails, RedirectAttributes redirectAttributes) {
         try {
-            Optional<NctOrder> nctExistingOrderOpt = nctOrderService.nctGetOrderById(id);
-            if (nctExistingOrderOpt.isEmpty()) {
-                nctRedirectAttributes.addFlashAttribute("nctError", "Đơn hàng không tồn tại!");
-                return "redirect:/admin/orders";
-            }
-
-            NctOrder nctExistingOrder = nctExistingOrderOpt.get();
-
-            // Chỉ cho phép chỉnh sửa một số thông tin
-            nctExistingOrder.setNctShippingAddress(nctOrder.getNctShippingAddress());
-            nctExistingOrder.setNctPhone(nctOrder.getNctPhone());
-            nctExistingOrder.setNctUpdatedAt(java.time.LocalDateTime.now());
-
-            nctOrderService.nctSaveOrder(nctExistingOrder);
-            nctRedirectAttributes.addFlashAttribute("nctSuccess", "Cập nhật đơn hàng thành công!");
-
+            nctOrderService.nctUpdateOrder(orderId, orderDetails);
+            redirectAttributes.addFlashAttribute("nctSuccess", "Đơn hàng đã được cập nhật thành công.");
+            return "redirect:/admin/orders/view/" + orderId;
         } catch (Exception e) {
-            nctRedirectAttributes.addFlashAttribute("nctError", "Lỗi khi cập nhật đơn hàng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("nctError", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/orders/edit/" + orderId;
         }
-
-        return "redirect:/admin/orders/view/" + id;
     }
 
     @PostMapping("/update-status/{id}")
-    public String nctUpdateOrderStatus(
-            @PathVariable Long id,
-            @RequestParam NctOrder.NctOrderStatus nctStatus,
-            RedirectAttributes nctRedirectAttributes) {
-
+    public String updateOrderStatus(@PathVariable("id") Long orderId,
+                                    @RequestParam("status") NctOrder.NctOrderStatus status,
+                                    RedirectAttributes redirectAttributes) {
         try {
-            nctOrderService.nctUpdateOrderStatus(id, nctStatus);
-            nctRedirectAttributes.addFlashAttribute("nctSuccess", "Cập nhật trạng thái đơn hàng thành công!");
+            nctOrderService.nctUpdateOrderStatus(orderId, status);
+            redirectAttributes.addFlashAttribute("nctSuccess", "Cập nhật trạng thái đơn hàng thành công.");
         } catch (Exception e) {
-            nctRedirectAttributes.addFlashAttribute("nctError", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("nctError", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
         }
-
-        return "redirect:/admin/orders/view/" + id;
+        return "redirect:/admin/orders/view/" + orderId;
     }
 
-    // SỬA: Thêm RedirectAttributes parameter
     @GetMapping("/cancel/{id}")
-    public String nctShowCancelForm(@PathVariable Long id, Model model, RedirectAttributes nctRedirectAttributes) {
-        Optional<NctOrder> nctOrderOpt = nctOrderService.nctGetOrderById(id);
-        if (nctOrderOpt.isEmpty()) {
-            return "redirect:/admin/orders";
+    public String cancelOrderForm(@PathVariable("id") Long orderId, Model model, RedirectAttributes redirectAttributes) {
+        Optional<NctOrder> orderOpt = nctOrderService.nctGetOrderById(orderId);
+        if (orderOpt.isPresent()) {
+            NctOrder order = orderOpt.get();
+            if (!order.isNctCancellable()) {
+                redirectAttributes.addFlashAttribute("nctError", "Không thể hủy đơn hàng ở trạng thái này.");
+                return "redirect:/admin/orders/view/" + orderId;
+            }
+            model.addAttribute("nctOrder", order);
+            model.addAttribute("nctPageTitle", "Hủy Đơn hàng #" + orderId);
+            return "admin/orders/nct-order-cancel";
         }
-
-        NctOrder nctOrder = nctOrderOpt.get();
-        if (!nctOrder.isNctCancellable()) {
-            nctRedirectAttributes.addFlashAttribute("nctError", "Không thể hủy đơn hàng này!");
-            return "redirect:/admin/orders/view/" + id;
-        }
-
-        model.addAttribute("nctOrder", nctOrder);
-        model.addAttribute("nctPageTitle", "Hủy Đơn hàng #" + nctOrder.getNctOrderId());
-        return "admin/orders/nct-order-cancel";
+        return "redirect:/admin/orders";
     }
 
     @PostMapping("/cancel/{id}")
-    public String nctCancelOrder(
-            @PathVariable Long id,
-            @RequestParam(required = false) String nctCancelReason,
-            RedirectAttributes nctRedirectAttributes) {
-
+    public String cancelOrder(@PathVariable("id") Long orderId, RedirectAttributes redirectAttributes) {
         try {
-            nctOrderService.nctCancelOrder(id);
-            nctRedirectAttributes.addFlashAttribute("nctSuccess", "Hủy đơn hàng thành công!");
+            nctOrderService.nctCancelOrder(orderId);
+            redirectAttributes.addFlashAttribute("nctSuccess", "Đơn hàng đã được hủy thành công.");
         } catch (Exception e) {
-            nctRedirectAttributes.addFlashAttribute("nctError", "Lỗi khi hủy đơn hàng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("nctError", "Lỗi khi hủy đơn hàng: " + e.getMessage());
         }
-        return "redirect:/admin/orders";
+        return "redirect:/admin/orders/view/" + orderId;
     }
 
     @GetMapping("/delete/{id}")
-    public String nctShowDeleteForm(@PathVariable Long id, Model model) {
-        Optional<NctOrder> nctOrderOpt = nctOrderService.nctGetOrderById(id);
-        if (nctOrderOpt.isEmpty()) {
-            return "redirect:/admin/orders";
+    public String deleteOrderForm(@PathVariable("id") Long orderId, Model model) {
+        Optional<NctOrder> orderOpt = nctOrderService.nctGetOrderById(orderId);
+        if (orderOpt.isPresent()) {
+            model.addAttribute("nctOrder", orderOpt.get());
+            model.addAttribute("nctPageTitle", "Xóa Đơn hàng #" + orderId);
+            return "admin/orders/nct-order-delete";
         }
-
-        model.addAttribute("nctOrder", nctOrderOpt.get());
-        model.addAttribute("nctPageTitle", "Xóa Đơn hàng #" + id);
-        return "admin/orders/nct-order-delete";
+        return "redirect:/admin/orders";
     }
 
     @PostMapping("/delete/{id}")
-    public String nctDeleteOrder(@PathVariable Long id, RedirectAttributes nctRedirectAttributes) {
+    public String deleteOrder(@PathVariable("id") Long orderId, RedirectAttributes redirectAttributes) {
         try {
-            nctOrderService.nctDeleteOrder(id);
-            nctRedirectAttributes.addFlashAttribute("nctSuccess", "Xóa đơn hàng thành công!");
+            nctOrderService.nctDeleteOrder(orderId);
+            redirectAttributes.addFlashAttribute("nctSuccess", "Đơn hàng đã được xóa vĩnh viễn.");
+            return "redirect:/admin/orders";
         } catch (Exception e) {
-            nctRedirectAttributes.addFlashAttribute("nctError", "Lỗi khi xóa đơn hàng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("nctError", "Lỗi khi xóa đơn hàng: " + e.getMessage());
+            return "redirect:/admin/orders/view/" + orderId;
         }
-        return "redirect:/admin/orders";
     }
 }

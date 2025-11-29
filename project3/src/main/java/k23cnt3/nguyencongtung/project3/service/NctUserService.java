@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,5 +82,11 @@ public class NctUserService {
 
     public List<NctUser> nctSearchUsers(String keyword) {
         return nctUserRepository.findByNctUsernameContainingOrNctEmailContainingOrNctFullNameContaining(keyword, keyword, keyword);
+    }
+
+    public long countUsersCreatedBetween(LocalDateTime start, LocalDateTime end) {
+        return nctGetAllUsers().stream()
+                .filter(u -> u.getNctCreatedAt() != null && !u.getNctCreatedAt().isBefore(start) && u.getNctCreatedAt().isBefore(end))
+                .count();
     }
 }

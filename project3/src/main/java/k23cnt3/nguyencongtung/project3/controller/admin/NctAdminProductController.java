@@ -223,6 +223,20 @@ public class NctAdminProductController {
 
         return "/uploads/" + nctFileName;
     }
+    // Add this method inside your NctAdminProductController class
+    @PostMapping("/update-status/{id}")
+    public String nctUpdateProductStatus(@PathVariable("id") Long productId,
+                                         @RequestParam("status") NctProduct.NctStatus status,
+                                         RedirectAttributes redirectAttributes) {
+        try {
+            nctProductService.nctUpdateProductStatus(productId, status);
+            redirectAttributes.addFlashAttribute("nctSuccess", "Trạng thái sản phẩm đã được cập nhật thành công.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("nctError", "Lỗi khi cập nhật trạng thái: " + e.getMessage());
+        }
+        return "redirect:/admin/products/view/" + productId;
+    }
+
 
     // Utility method: Xóa file ảnh
     private void nctDeleteImageFile(String nctImageUrl) throws IOException {

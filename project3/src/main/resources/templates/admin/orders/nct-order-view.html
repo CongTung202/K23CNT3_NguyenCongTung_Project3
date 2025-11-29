@@ -1,276 +1,186 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${nctPageTitle}">Chi tiết Đơn hàng - Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .nct-sidebar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-        }
-        .nct-sidebar .nav-link {
-            color: #e9ecef;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .nct-sidebar .nav-link:hover, .nct-sidebar .nav-link.active {
-            color: white;
-            background: rgba(255,255,255,0.1);
-            border-left: 4px solid #fff;
-        }
-        .nct-info-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .nct-product-item {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-        }
-        .nct-product-item:last-child {
-            border-bottom: none;
-        }
-    </style>
-</head>
+<head th:replace="~{fragments/nct-admin-head :: adminHead(pageTitle=${nctPageTitle})}"></head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 nct-sidebar p-0">
-            <div class="p-4 text-center">
-                <h4 class="text-white mb-0">
-                    <i class="fas fa-cog me-2"></i>NCT Admin
-                </h4>
-                <small class="text-light">Quản lý hệ thống</small>
-            </div>
-            <nav class="nav flex-column mt-3">
-                <a class="nav-link" href="/admin/dashboard">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                </a>
-                <a class="nav-link" href="/admin/products">
-                    <i class="fas fa-box me-2"></i>Sản phẩm
-                </a>
-                <a class="nav-link" href="/admin/categories">
-                    <i class="fas fa-tags me-2"></i>Danh mục
-                </a>
-                <a class="nav-link active" href="/admin/orders">
-                    <i class="fas fa-shopping-cart me-2"></i>Đơn hàng
-                </a>
-                <a class="nav-link" href="/admin/users">
-                    <i class="fas fa-users me-2"></i>Người dùng
-                </a>
-                <a class="nav-link" href="/">
-                    <i class="fas fa-home me-2"></i>Về trang chủ
-                </a>
+<!-- Sidebar -->
+<div th:replace="~{fragments/nct-admin-sidebar :: adminSidebar(activePage='orders')}"></div>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center nct-page-header">
+        <div>
+            <h1 class="h3 mb-2">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Chi tiết Đơn hàng
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/orders">Đơn hàng</a></li>
+                    <li class="breadcrumb-item active" th:text="'#' + ${nctOrder.nctOrderId}"></li>
+                </ol>
             </nav>
         </div>
+        <div>
+            <a href="/admin/orders" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-cogs me-2"></i>Thao tác
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" th:href="@{/admin/orders/edit/{id}(id=${nctOrder.nctOrderId})}"
+                           th:if="${nctOrder.isNctEditable()}">
+                            <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-danger" th:href="@{/admin/orders/cancel/{id}(id=${nctOrder.nctOrderId})}"
+                           th:if="${nctOrder.isNctCancellable()}">
+                            <i class="fas fa-times-circle me-2"></i>Hủy đơn hàng
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" th:href="@{/admin/orders/delete/{id}(id=${nctOrder.nctOrderId})}">
+                            <i class="fas fa-trash me-2"></i>Xóa vĩnh viễn
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 mb-2">
-                        <i class="fas fa-shopping-cart me-2"></i>Đơn hàng #<span th:text="${nctOrder.nctOrderId}"></span>
-                    </h1>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/admin/orders">Đơn hàng</a></li>
-                            <li class="breadcrumb-item active">#<span th:text="${nctOrder.nctOrderId}"></span></li>
-                        </ol>
-                    </nav>
+    <!-- Alert Messages -->
+    <div th:if="${nctSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${nctSuccess}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${nctError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${nctError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <!-- Order Details -->
+        <div class="col-lg-8">
+            <div class="card nct-card">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box-open me-2"></i>Sản phẩm trong đơn hàng
+                    </h5>
+                    <span class="badge bg-secondary" th:text="${nctOrder.nctItemCount} + ' sản phẩm'"></span>
                 </div>
-                <div>
-                    <a href="/admin/orders" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-arrow-left me-1"></i> Quay lại
-                    </a>
-                    <a th:href="@{/admin/orders/edit/{id}(id=${nctOrder.nctOrderId})}"
-                       th:if="${nctOrder.nctEditable}"
-                       class="btn btn-warning me-2">
-                        <i class="fas fa-edit me-1"></i> Chỉnh sửa
-                    </a>
-                    <a th:href="@{/admin/orders/cancel/{id}(id=${nctOrder.nctOrderId})}"
-                       th:if="${nctOrder.nctCancellable}"
-                       class="btn btn-danger">
-                        <i class="fas fa-times me-1"></i> Hủy đơn
-                    </a>
-                </div>
-            </div>
-
-            <!-- Alert Messages -->
-            <div th:if="${nctSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <span th:text="${nctSuccess}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <div th:if="${nctError}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span th:text="${nctError}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <div class="row">
-                <!-- Thông tin đơn hàng -->
-                <div class="col-lg-8">
-                    <!-- Sản phẩm trong đơn hàng -->
-                    <div class="card nct-info-card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-boxes me-2"></i>Sản phẩm trong đơn hàng
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div th:each="item : ${nctOrder.nctOrderItems}" class="nct-product-item">
-                                <div class="row align-items-center">
-                                    <div class="col-md-2">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table nct-table mb-0">
+                            <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="item : ${nctOrder.nctOrderItems}">
+                                <td>
+                                    <div class="d-flex align-items-center">
                                         <img th:src="${item.nctProduct.nctImageUrl}"
                                              th:alt="${item.nctProduct.nctProductName}"
-                                             class="img-fluid rounded" style="max-height: 80px;">
+                                             class="nct-table-img me-3">
+                                        <div>
+                                            <div class="fw-bold" th:text="${item.nctProduct.nctProductName}"></div>
+                                            <small class="text-muted" th:text="${item.nctProduct.nctCategory.nctCategoryName}"></small>
+                                        </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <h6 th:text="${item.nctProduct.nctProductName}"></h6>
-                                        <small class="text-muted" th:text="${item.nctProduct.nctCategory.nctCategoryName}"></small>
-                                    </div>
-                                    <div class="col-md-2 text-center">
-                                        <span th:text="${item.nctQuantity}"></span> x
-                                    </div>
-                                    <div class="col-md-2 text-end">
-                                        <strong th:text="'₫' + ${#numbers.formatDecimal(item.nctPrice, 0, 'COMMA', 0, 'POINT')}"></strong>
-                                    </div>
-                                    <div class="col-md-2 text-end">
-                                        <strong th:text="'₫' + ${#numbers.formatDecimal(item.nctQuantity * item.nctPrice.doubleValue(), 0, 'COMMA', 0, 'POINT')}"></strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tổng cộng -->
-                            <div class="row mt-3 pt-3 border-top">
-                                <div class="col-8 text-end">
-                                    <strong>Tổng cộng:</strong>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <h5 class="text-primary" th:text="${nctOrder.nctFormattedTotal}"></h5>
-                                </div>
-                            </div>
-                        </div>
+                                </td>
+                                <td class="text-center" th:text="${item.nctQuantity}"></td>
+                                <td class="text-end" th:text="'₫' + ${#numbers.formatDecimal(item.nctPrice, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td class="text-end fw-bold" th:text="'₫' + ${#numbers.formatDecimal(item.nctQuantity * item.nctPrice.doubleValue(), 0, 'COMMA', 0, 'POINT')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
+                </div>
+                <div class="card-footer bg-transparent text-end">
+                    <h4 class="mb-0">Tổng cộng: <span class="text-danger fw-bold" th:text="${nctOrder.nctFormattedTotal}"></span></h4>
+                </div>
+            </div>
+        </div>
 
-                    <!-- Cập nhật trạng thái -->
-                    <div class="card nct-info-card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-sync-alt me-2"></i>Cập nhật trạng thái
-                            </h5>
+        <!-- Customer & Order Info -->
+        <div class="col-lg-4">
+            <div class="card nct-card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>Thông tin đơn hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Mã đơn hàng:</span>
+                        <strong th:text="'#' + ${nctOrder.nctOrderId}"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Ngày đặt:</span>
+                        <span th:text="${#temporals.format(nctOrder.nctCreatedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Thanh toán:</span>
+                        <span th:text="${nctOrder.nctPaymentMethodDisplayName}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="me-2">Trạng thái:</span>
+                        <!-- Display static badge if status is not updatable -->
+                        <div th:if="${!nctOrder.isNctStatusUpdatable()}">
+                            <span th:classappend="'badge bg-' + ${nctOrder.nctStatusColor}"
+                                  class="badge fs-6"
+                                  th:text="${nctOrder.nctStatusDisplayName}"></span>
                         </div>
-                        <div class="card-body">
-                            <form th:action="@{/admin/orders/update-status/{id}(id=${nctOrder.nctOrderId})}" method="post">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <select class="form-select" name="nctStatus" required>
-                                            <option th:each="status : ${nctOrderStatuses}"
-                                                    th:value="${status}"
-                                                    th:text="${status == T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).PENDING ? 'Chờ xác nhận' :
-                                                              status == T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).CONFIRMED ? 'Đã xác nhận' :
-                                                              status == T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).SHIPPING ? 'Đang giao hàng' :
-                                                              status == T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).DELIVERED ? 'Đã giao hàng' :
-                                                              status == T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).CANCELLED ? 'Đã hủy' : 'Không xác định'}"
-                                                    th:selected="${nctOrder.nctStatus == status}">
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button type="submit" class="btn btn-primary w-100">
-                                            <i class="fas fa-save me-1"></i> Cập nhật
-                                        </button>
-                                    </div>
-                                </div>
+                        <!-- Display update form if status is updatable -->
+                        <div th:if="${nctOrder.isNctStatusUpdatable()}">
+                            <form th:action="@{/admin/orders/update-status/{id}(id=${nctOrder.nctOrderId})}" method="post" class="d-inline-flex">
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 150px;">
+                                    <option th:each="s : ${T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).values()}"
+                                            th:value="${s}"
+                                            th:text="${s.getDisplayName()}"
+                                            th:selected="${s == nctOrder.nctStatus}"></option>
+                                </select>
                             </form>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Thông tin khách hàng & đơn hàng -->
-                <div class="col-lg-4">
-                    <!-- Thông tin khách hàng -->
-                    <div class="card nct-info-card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-user me-2"></i>Thông tin khách hàng
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <strong th:text="${nctOrder.nctUser.nctFullName}"></strong>
-                            </div>
-                            <div class="mb-2">
-                                <i class="fas fa-envelope me-2 text-muted"></i>
-                                <span th:text="${nctOrder.nctUser.nctEmail}"></span>
-                            </div>
-                            <div class="mb-2">
-                                <i class="fas fa-phone me-2 text-muted"></i>
-                                <span th:text="${nctOrder.nctUser.nctPhone ?: 'Chưa cập nhật'}"></span>
-                            </div>
-                            <div>
-                                <i class="fas fa-map-marker-alt me-2 text-muted"></i>
-                                <small th:text="${nctOrder.nctUser.nctAddress ?: 'Chưa cập nhật'}"></small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Thông tin giao hàng -->
-                    <div class="card nct-info-card mb-4">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-truck me-2"></i>Thông tin giao hàng
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <strong>Địa chỉ giao hàng:</strong>
-                                <p class="mb-0" th:text="${nctOrder.nctShippingAddress}"></p>
-                            </div>
-                            <div>
-                                <strong>Số điện thoại:</strong>
-                                <p class="mb-0" th:text="${nctOrder.nctPhone}"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Thông tin thanh toán -->
-                    <div class="card nct-info-card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-credit-card me-2"></i>Thông tin thanh toán
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <strong>Phương thức:</strong>
-                                <p class="mb-0" th:text="${nctOrder.nctPaymentMethodDisplayName}"></p>
-                            </div>
-                            <div class="mb-3">
-                                <strong>Tổng tiền:</strong>
-                                <h5 class="text-primary mb-0" th:text="${nctOrder.nctFormattedTotal}"></h5>
-                            </div>
-                            <div>
-                                <strong>Trạng thái:</strong>
-                                <div>
-                                    <span th:classappend="'badge bg-' + ${nctOrder.nctStatusColor}"
-                                          class="badge fs-6"
-                                          th:text="${nctOrder.nctStatusDisplayName}"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card nct-card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Thông tin khách hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2" th:text="${nctOrder.nctUser.nctFullName}"></h6>
+                    <p class="mb-1 text-muted">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span th:text="${nctOrder.nctUser.nctEmail}"></span>
+                    </p>
+                    <p class="mb-1 text-muted">
+                        <i class="fas fa-phone me-2"></i>
+                        <span th:text="${nctOrder.nctPhone}"></span>
+                    </p>
+                    <p class="mb-0 text-muted">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <span th:text="${nctOrder.nctShippingAddress}"></span>
+                    </p>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
-</div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

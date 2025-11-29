@@ -5,8 +5,12 @@ import k23cnt3.nguyencongtung.project3.entity.NctProduct;
 import k23cnt3.nguyencongtung.project3.repository.NctProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,5 +156,20 @@ public class NctProductService {
     public boolean nctIsProductInStock(Long productId, Integer quantity) {
         Optional<NctProduct> productOpt = nctProductRepository.findById(productId);
         return productOpt.isPresent() && productOpt.get().getNctStockQuantity() >= quantity;
+    }
+
+    // Add this method inside your NctProductService class
+    @Transactional
+    public NctProduct nctUpdateProductStatus(Long productId, NctProduct.NctStatus status) {
+        NctProduct product = nctProductRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại với ID: " + productId));
+        product.setNctStatus(status);
+        product.setNctUpdatedAt(LocalDateTime.now());
+        return nctProductRepository.save(product);
+    }
+    public long countProductsCreatedBetween(LocalDateTime start, LocalDateTime end) {
+        return nctGetAllProducts().stream()
+                .filter(p -> p.getNctCreatedAt() != null && !p.getNctCreatedAt().isBefore(start) && p.getNctCreatedAt().isBefore(end))
+                .count();
     }
 }

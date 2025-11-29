@@ -47,7 +47,21 @@ public class NctOrder {
     private List<NctOrderItem> nctOrderItems = new ArrayList<>();
 
     public enum NctOrderStatus {
-        PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED
+        PENDING("Chờ xác nhận"),
+        CONFIRMED("Đã xác nhận"),
+        SHIPPING("Đang giao hàng"),
+        DELIVERED("Đã giao hàng"),
+        CANCELLED("Đã hủy");
+
+        private final String displayName;
+
+        NctOrderStatus(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 
     public enum NctPaymentMethod {
@@ -170,14 +184,7 @@ public class NctOrder {
     // Method hiển thị tên trạng thái
     @Transient
     public String getNctStatusDisplayName() {
-        switch (this.nctStatus) {
-            case PENDING: return "Chờ xác nhận";
-            case CONFIRMED: return "Đã xác nhận";
-            case SHIPPING: return "Đang giao hàng";
-            case DELIVERED: return "Đã giao hàng";
-            case CANCELLED: return "Đã hủy";
-            default: return "Không xác định";
-        }
+        return this.nctStatus != null ? this.nctStatus.getDisplayName() : "Không xác định";
     }
 
     // Method hiển thị tên phương thức thanh toán
@@ -199,6 +206,11 @@ public class NctOrder {
     @Transient
     public boolean isNctEditable() {
         return this.nctStatus == NctOrderStatus.PENDING;
+    }
+
+    @Transient
+    public boolean isNctStatusUpdatable() {
+        return this.nctStatus != NctOrderStatus.DELIVERED && this.nctStatus != NctOrderStatus.CANCELLED;
     }
 
     // Method lấy màu cho trạng thái

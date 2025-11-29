@@ -265,21 +265,36 @@ public class NctOrderService implements NctOrderServiceInterface {
         return nctOrderRepository.getMonthlyOrderStats();
     }
 
-    public NctOrder nctUpdateOrderInfo(Long orderId, String shippingAddress, String phone) {
-        Optional<NctOrder> nctOrderOpt = nctOrderRepository.findById(orderId);
-        if (nctOrderOpt.isPresent()) {
-            NctOrder nctOrder = nctOrderOpt.get();
+    public NctOrder nctUpdateOrder(Long orderId, NctOrder orderDetails) {
+        NctOrder existingOrder = nctOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Đơn hàng không tồn tại"));
 
-            if (nctOrder.getNctStatus() != NctOrder.NctOrderStatus.PENDING) {
-                throw new RuntimeException("Chỉ có thể cập nhật đơn hàng ở trạng thái chờ xác nhận");
-            }
-
-            nctOrder.setNctShippingAddress(shippingAddress);
-            nctOrder.setNctPhone(phone);
-            nctOrder.setNctUpdatedAt(LocalDateTime.now());
-
-            return nctOrderRepository.save(nctOrder);
+        // Only allow address and phone to be updated if the order is still pending
+        if (existingOrder.getNctStatus() == NctOrder.NctOrderStatus.PENDING) {
+            existingOrder.setNctShippingAddress(orderDetails.getNctShippingAddress());
+            existingOrder.setNctPhone(orderDetails.getNctPhone());
         }
-        throw new RuntimeException("Đơn hàng không tồn tại");
+
+        // Always allow the status to be updated
+        existingOrder.setNctStatus(orderDetails.getNctStatus());
+        existingOrder.setNctUpdatedAt(LocalDateTime.now());
+
+        return nctOrderRepository.save(existingOrder);
     }
+
+// ... inside NctOrderService class
+
+    public long countOrdersCreatedBetween(LocalDateTime start, LocalDateTime end) {
+        return nctGetAllOrders().stream()
+                .filter(o -> o.getNctCreatedAt() != null && !o.getNctCreatedAt().isBefore(start) && o.getNctCreatedAt().isBefore(end))
+                .count();
+    }
+
+    public double getRevenueBetween(LocalDateTime start, LocalDateTime end) {
+        return nctGetAllOrders().stream()
+                .filter(o -> o.getNctStatus() == NctOrder.NctOrderStatus.DELIVERED && o.getNctCreatedAt() != null && !o.getNctCreatedAt().isBefore(start) && o.getNctCreatedAt().isBefore(end))
+                .mapToDouble(o -> o.getNctTotalAmount().doubleValue())
+                .sum();
+    }
+
 }
