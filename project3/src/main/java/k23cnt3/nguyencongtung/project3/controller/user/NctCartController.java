@@ -6,6 +6,8 @@ import k23cnt3.nguyencongtung.project3.service.NctCartService;
 import k23cnt3.nguyencongtung.project3.service.NctUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/cart")
@@ -52,30 +55,21 @@ public class NctCartController {
     }
 
     @PostMapping("/add")
-    public String nctAddToCart(@RequestParam("productId") Long productId,
-                               @RequestParam(value = "quantity", defaultValue = "1") Integer quantity,
-                               @RequestParam(value = "redirectTo", required = false) String redirectTo,
-                               @AuthenticationPrincipal UserDetails userDetails,
-                               RedirectAttributes redirectAttributes,
-                               HttpServletRequest request) {
+    public ResponseEntity<?> nctAddToCart(@RequestParam("productId") Long productId,
+                                          @RequestParam(value = "quantity", defaultValue = "1") Integer quantity,
+                                          @AuthenticationPrincipal UserDetails userDetails) {
         NctUser currentUser = getCurrentUser(userDetails);
         if (currentUser == null) {
-            return "redirect:/login";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "Vui lòng đăng nhập để thực hiện chức năng này."));
         }
 
         try {
             nctCartService.nctAddToCart(currentUser, productId, quantity);
-            redirectAttributes.addFlashAttribute("successMessage", "Sản phẩm đã được thêm vào giỏ hàng!");
+            Integer cartCount = nctCartService.nctGetCartItemCount(currentUser);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Thêm vào giỏ hàng thành công!", "cartCount", cartCount));
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
-
-        if ("checkout".equals(redirectTo)) {
-            return "redirect:/checkout";
-        }
-
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/products");
     }
 
     @PostMapping("/update")
@@ -97,8 +91,8 @@ public class NctCartController {
         return "redirect:/cart";
     }
 
-    @PostMapping("/remove")
-    public String nctRemoveFromCart(@RequestParam("cartItemId") Long cartItemId,
+    @PostMapping("/remove/{cartItemId}")
+    public String nctRemoveFromCart(@PathVariable("cartItemId") Long cartItemId,
                                     @AuthenticationPrincipal UserDetails userDetails,
                                     RedirectAttributes redirectAttributes) {
         NctUser currentUser = getCurrentUser(userDetails);

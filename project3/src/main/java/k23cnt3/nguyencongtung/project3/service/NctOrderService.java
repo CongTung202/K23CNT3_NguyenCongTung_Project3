@@ -3,7 +3,6 @@ package k23cnt3.nguyencongtung.project3.service;
 import k23cnt3.nguyencongtung.project3.entity.*;
 import k23cnt3.nguyencongtung.project3.repository.NctOrderRepository;
 import k23cnt3.nguyencongtung.project3.repository.NctOrderItemRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +46,7 @@ public class NctOrderService implements NctOrderServiceInterface {
     }
 
     @Override
+    @Transactional
     public NctOrder nctCreateOrder(NctUser nctUser, String nctShippingAddress, String nctPhone,
                                    NctOrder.NctPaymentMethod nctPaymentMethod) {
         List<NctCartItem> nctCartItems = nctCartService.nctGetCartItems(nctUser);
@@ -71,6 +71,49 @@ public class NctOrderService implements NctOrderServiceInterface {
 
             if (nctProduct.getNctStockQuantity() < nctCartItem.getNctQuantity()) {
                 throw new RuntimeException("Sản phẩm " + nctProduct.getNctProductName() + " không đủ số lượng tồn kho");
+            }
+
+            nctProduct.setNctStockQuantity(nctProduct.getNctStockQuantity() - nctCartItem.getNctQuantity());
+            nctProductService.nctSaveProduct(nctProduct);
+
+            NctOrderItem nctOrderItem = new NctOrderItem();
+            nctOrderItem.setNctOrder(nctSavedOrder);
+            nctOrderItem.setNctProduct(nctProduct);
+            nctOrderItem.setNctQuantity(nctCartItem.getNctQuantity());
+            nctOrderItem.setNctPrice(nctProduct.getNctPrice());
+            nctOrderItemRepository.save(nctOrderItem);
+        }
+
+        nctCartService.nctClearCart(nctUser);
+
+        return nctSavedOrder;
+    }
+
+    @Override
+    @Transactional
+    public NctOrder nctCreateOrderFromCart(NctUser nctUser, NctOrder nctOrderDetails) {
+        List<NctCartItem> nctCartItems = nctCartService.nctGetCartItems(nctUser);
+        if (nctCartItems.isEmpty()) {
+            throw new RuntimeException("Giỏ hàng trống, không thể đặt hàng.");
+        }
+
+        BigDecimal nctTotalAmount = BigDecimal.valueOf(nctCartService.nctCalculateCartTotal(nctUser));
+
+        NctOrder nctOrder = new NctOrder();
+        nctOrder.setNctUser(nctUser);
+        nctOrder.setNctTotalAmount(nctTotalAmount);
+        nctOrder.setNctShippingAddress(nctOrderDetails.getNctShippingAddress());
+        nctOrder.setNctPhone(nctOrderDetails.getNctPhone());
+        nctOrder.setNctPaymentMethod(nctOrderDetails.getNctPaymentMethod());
+        nctOrder.setNctStatus(NctOrder.NctOrderStatus.PENDING);
+
+        NctOrder nctSavedOrder = nctOrderRepository.save(nctOrder);
+
+        for (NctCartItem nctCartItem : nctCartItems) {
+            NctProduct nctProduct = nctCartItem.getNctProduct();
+
+            if (nctProduct.getNctStockQuantity() < nctCartItem.getNctQuantity()) {
+                throw new RuntimeException("Sản phẩm '" + nctProduct.getNctProductName() + "' không đủ số lượng tồn kho.");
             }
 
             nctProduct.setNctStockQuantity(nctProduct.getNctStockQuantity() - nctCartItem.getNctQuantity());
