@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Character Guide</title>
+    <!-- Ensure this links to your main stylesheet -->
+    <link rel="stylesheet" th:href="@{/css/nct-user-style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div th:fragment="nct-chat-model">
+    <div class="character-guide-container">
+        <div class="speech-bubble">
+            <p class="bubble-text">Chat với UMACT. để tìm kiếm sản phẩm ưng ý, cũng như tra cứu thông tin chi tiết về sản phẩm bạn nhé.</p>
+            <a href="#" target="_blank" class="chat-link">
+                <span>Chat với UMACT.</span>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        <div class="character-image">
+            <!-- IMPORTANT: Replace with the actual path to your character image -->
+            <img th:src="@{/images/tazuna.png}" alt="Guide Character">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

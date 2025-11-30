@@ -15,11 +15,14 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableWebSecurity
 public class NctSecurityConfig {
 
-    @Autowired
-    private NctUserDetailsService nctUserDetailsService;
+    private final NctUserDetailsService nctUserDetailsService;
+    private final AuthenticationSuccessHandler nctCustomAuthenticationSuccessHandler;
 
     @Autowired
-    private AuthenticationSuccessHandler nctCustomAuthenticationSuccessHandler;
+    public NctSecurityConfig(NctUserDetailsService nctUserDetailsService, AuthenticationSuccessHandler nctCustomAuthenticationSuccessHandler) {
+        this.nctUserDetailsService = nctUserDetailsService;
+        this.nctCustomAuthenticationSuccessHandler = nctCustomAuthenticationSuccessHandler;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -28,6 +31,7 @@ public class NctSecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/",
+                                "/home",
                                 "/products/**",
                                 "/auth/**",
                                 "/css/**",
@@ -44,11 +48,16 @@ public class NctSecurityConfig {
                         .failureUrl("/auth/login?error=true")
                         .permitAll()
                 )
+                .rememberMe(rememberMe -> rememberMe
+                        .key("a-very-secret-key-for-nct-project") // A secret key for hashing the cookie
+                        .tokenValiditySeconds(7 * 24 * 60 * 60) // 7 days
+                        .userDetailsService(nctUserDetailsService)
+                )
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
                         .logoutSuccessUrl("/auth/login?logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "remember-me") // Delete remember-me cookie on logout
                         .permitAll()
                 )
                 .userDetailsService(nctUserDetailsService);
