@@ -1,53 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        footer {
-            background-color: #1a1a1a;
-            color: #fff;
-            padding: 40px 20px;
-            margin-top: 60px;
-            margin-left: 250px;
-        }
-        footer h3 {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        footer a {
-            color: #ccc;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s;
-        }
-        footer a:hover {
-            color: #fff;
-        }
-        .footer-section {
-            margin-bottom: 30px;
-        }
-        .footer-info {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 12px;
-            font-size: 13px;
-            color: #ccc;
-        }
-        .footer-info i {
-            margin-top: 2px;
-        }
-        @media (max-width: 768px) {
-            footer {
-                margin-left: 0;
-            }
-        }
-    </style>
-</head>
 <body>
 
-<footer th:fragment="footer">
+<footer th:fragment="footer" class="mt-auto">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div class="footer-section">
             <h3>Thông tin UMACT.vn</h3>

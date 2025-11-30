@@ -1,51 +1,65 @@
 package k23cnt3.nguyencongtung.project3.config;
 
+import k23cnt3.nguyencongtung.project3.service.NctUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
 public class NctSecurityConfig {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        // Use NoOpPasswordEncoder for plain text passwords
-        return NoOpPasswordEncoder.getInstance();
-    }
+    @Autowired
+    private NctUserDetailsService nctUserDetailsService;
+
+    @Autowired
+    private AuthenticationSuccessHandler nctCustomAuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**", "/", "/products/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/",
+                                "/products/**",
+                                "/auth/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(nctCustomAuthenticationSuccessHandler)
                         .failureUrl("/auth/login?error=true")
                         .permitAll()
                 )
-                .rememberMe(rememberMe -> rememberMe
-                        .key("a-unique-and-secret-key-for-hashing") // Change this to a secret key
-                        .tokenValiditySeconds(86400 * 7) // 7 days
-                        .rememberMeParameter("remember-me")
-                )
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout")
-                        .logoutSuccessUrl("/auth/login?logout=true")
+                        .logoutSuccessUrl("/auth/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
-                );
+                )
+                .userDetailsService(nctUserDetailsService);
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        // This is used because the project currently stores passwords in plain text.
+        // For production, you should switch to a strong encoder like BCryptPasswordEncoder.
+        return NoOpPasswordEncoder.getInstance();
     }
 }

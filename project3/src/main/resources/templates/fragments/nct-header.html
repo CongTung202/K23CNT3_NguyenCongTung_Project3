@@ -1,94 +1,60 @@
 <!DOCTYPE html>
-                    <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-                    <head>
-                        <meta charset="UTF-8">
-                        <link rel="stylesheet" th:href="@{/css/nct-style.css}">
-                        <!-- CSS Dependencies -->
-                        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-                        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-                        <style>
-                            /* Styles for the header, consistent with other pages */
-                            header {
-                                background-color: #fff;
-                                border-bottom: 1px solid #e0e0e0;
-                                padding: 12px 20px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: space-between;
-                                position: sticky;
-                                top: 0;
-                                z-index: 50;
-                                height: 60px;
-                            }
-                            .logo {
-                                font-size: 20px;
-                                font-weight: bold;
-                                display: flex;
-                                align-items: center;
-                                gap: 2px;
-                                text-decoration: none;
-                            }
-                            .logo .red { color: #ff3333; }
-                            .logo .black { color: #000; }
-                        </style>
-                    </head>
-                    <body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
 
-                    <header th:fragment="header"
-                            xmlns:th="http://www.thymeleaf.org"
-                            xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-                        <!-- Logo -->
-                        <a th:href="@{/}" class="logo">
-                            <span class="red">●</span><span class="black">UMACT</span><span class="red">.vn</span>
-                        </a>
+<header th:fragment="header">
+    <!-- Logo -->
+    <a th:href="@{/}" class="logo">
+        <span class="red">●</span><span class="black">UMACT</span><span class="red">.vn</span>
+    </a>
 
-                        <!-- Search Bar -->
-                        <div class="flex-1 mx-6 max-w-md">
-                            <form th:action="@{/products}" method="get" class="relative flex items-center">
-                                <input type="text" name="search" th:value="${nctSearchKeyword}" placeholder="Tìm kiếm sản phẩm..."
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-400 text-sm">
-                                <button type="submit" class="absolute right-3 text-gray-400 hover:text-gray-600">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </form>
-                        </div>
+    <!-- Search Bar -->
+    <div class="flex-1 mx-6 max-w-md">
+        <form th:action="@{/products}" method="get" class="relative flex items-center">
+            <input type="text" name="search" th:value="${nctSearchKeyword}" placeholder="Tìm kiếm sản phẩm..."
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-400 text-sm">
+            <button type="submit" class="absolute right-3 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
 
-                        <!-- Right Icons -->
-                        <div class="flex items-center gap-4">
-                            <a th:href="@{/wishlist}" title="Danh sách yêu thích" class="text-gray-600 hover:text-red-500 text-lg">
-                                <i class="far fa-bookmark"></i>
-                            </a>
-                            <a th:href="@{/cart}" title="Giỏ hàng" class="text-gray-600 hover:text-red-500 text-lg">
-                                <i class="fas fa-shopping-cart"></i>
-                            </a>
+    <!-- Right Icons -->
+    <div class="flex items-center gap-4">
+        <a th:href="@{/wishlist}" title="Danh sách yêu thích" class="text-gray-600 hover:text-red-500 text-lg">
+            <i class="far fa-bookmark"></i>
+        </a>
+        <a th:href="@{/cart}" title="Giỏ hàng" class="text-gray-600 hover:text-red-500 text-lg">
+            <i class="fas fa-shopping-cart"></i>
+        </a>
 
-                            <!-- User Icon: Anonymous -->
-                            <div sec:authorize="isAnonymous()">
-                                <a th:href="@{/auth/login}" title="Tài Khoản" class="text-gray-600 hover:text-red-500 text-lg">
-                                    <i class="fas fa-user"></i>
-                                </a>
-                            </div>
+        <!-- User Icon: Anonymous -->
+        <div sec:authorize="isAnonymous()">
+            <a th:href="@{/auth/login}" title="Tài Khoản" class="text-gray-600 hover:text-red-500 text-lg">
+                <i class="fas fa-user"></i>
+            </a>
+        </div>
 
-                            <!-- User Icon & Dropdown: Authenticated -->
-                            <div sec:authorize="isAuthenticated()" class="relative group">
-                                <a th:href="@{/profile}" title="Tài Khoản" class="text-gray-600 hover:text-red-500 text-lg cursor-pointer">
-                                    <i class="fas fa-user"></i>
-                                </a>
-                                <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                                    <div class="px-4 py-2 text-sm text-gray-700">
-                                        Xin chào, <strong sec:authentication="name">Username</strong>
-                                    </div>
-                                    <div class="border-t border-gray-100"></div>
-                                    <a th:href="@{/profile}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Quản lý tài khoản</a>
-                                    <form th:action="@{/auth/logout}" method="post" class="w-full">
-                                        <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Đăng xuất
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
+        <!-- User Icon & Dropdown: Authenticated -->
+        <div sec:authorize="isAuthenticated()" class="relative group">
+            <a th:href="@{/profile}" title="Tài Khoản" class="text-gray-600 hover:text-red-500 text-lg cursor-pointer">
+                <i class="fas fa-user"></i>
+            </a>
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                <div class="px-4 py-2 text-sm text-gray-700">
+                    Xin chào, <strong sec:authentication="name">Username</strong>
+                </div>
+                <div class="border-t border-gray-100"></div>
+                <a th:href="@{/profile}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Quản lý tài khoản</a>
+                <form th:action="@{/auth/logout}" method="post" class="w-full">
+                    <button type="submit" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
 
-                    </body>
-                    </html>
+</body>
+</html>

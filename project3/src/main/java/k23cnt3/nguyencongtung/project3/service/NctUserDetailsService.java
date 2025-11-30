@@ -31,7 +31,8 @@ public class NctUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 nctUser.getNctUsername(),
                 nctUser.getNctPassword(), // The plain text password from the database
-                Collections.singletonList(new SimpleGrantedAuthority(nctUser.getNctRole().name()))
+                // Add "ROLE_" prefix for standard Spring Security role handling
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + nctUser.getNctRole().name()))
         );
     }
 }

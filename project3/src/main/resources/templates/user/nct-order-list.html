@@ -5,50 +5,7 @@
     <title th:text="${nctPageTitle}">Đơn hàng của bạn</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-        }
-
-        /* Header */
-        header { background-color: #fff; border-bottom: 1px solid #e0e0e0; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; height: 60px; }
-        .logo { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 2px; }
-        .logo .red { color: #ff3333; }
-        .logo .black { color: #000; }
-
-        /* Sidebar */
-        .sidebar { position: fixed; left: 0; top: 60px; width: 250px; height: calc(100vh - 60px); background-color: #fff; border-right: 1px solid #e0e0e0; padding: 20px 0; z-index: 40; }
-        .sidebar-item { padding: 12px 20px; color: #333; text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 14px; transition: all 0.3s ease; border-left: 3px solid transparent; }
-        .sidebar-item:hover, .sidebar-item.active { background-color: #f0f0f0; color: #ff3333; border-left-color: #ff3333; }
-        .sidebar-item i { font-size: 16px; }
-
-        /* Main Content */
-        .main-content { margin-left: 250px; padding: 20px; }
-        .page-header { background-color: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .page-header h1 { font-size: 24px; font-weight: bold; color: #000; }
-
-        /* Order Card */
-        .order-card { background-color: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1rem; transition: all 0.3s ease; }
-        .order-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
-
-        /* Empty State */
-        .empty-state { text-align: center; padding: 60px 20px; background-color: #fff; border-radius: 8px; }
-        .empty-state i { font-size: 48px; color: #ddd; margin-bottom: 20px; }
-        .empty-state p { color: #999; font-size: 16px; margin-bottom: 20px; }
-        .empty-state a { display: inline-block; padding: 10px 24px; background-color: #ff3333; color: white; text-decoration: none; border-radius: 6px; transition: all 0.3s ease; }
-        .empty-state a:hover { background-color: #e60000; }
-
-        /* Footer */
-        footer { background-color: #1a1a1a; color: #fff; padding: 40px 20px; margin-top: 60px; margin-left: 250px; }
-        footer h3 { font-size: 14px; font-weight: bold; margin-bottom: 15px; }
-        footer a { color: #ccc; text-decoration: none; font-size: 13px; transition: color 0.3s; }
-        footer a:hover { color: #fff; }
-        .footer-section { margin-bottom: 30px; }
-        .footer-info { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 13px; color: #ccc; }
-        .footer-info i { margin-top: 2px; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/nct-user-style.css}">
 </head>
 <body>
 <div th:replace="~{fragments/nct-header :: header}"></div>
@@ -94,37 +51,7 @@
     </div>
 </main>
 
-<footer class="mt-auto">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div class="footer-section">
-            <h3>Thông tin UMACT.vn</h3>
-            <div class="footer-info">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Số 157, Phố Xốm, Phú Lãm, Hà Đông, Hà Nội</span>
-            </div>
-            <div class="footer-info">
-                <i class="fas fa-envelope"></i>
-                <span>UMACT@gmail.com</span>
-            </div>
-            <div class="footer-info">
-                <i class="fas fa-phone"></i>
-                <span>Hotline: 0334402527</span>
-            </div>
-        </div>
-        <div class="footer-section">
-            <h3>Chính sách chung</h3>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <a href="#">Chính sách bảo mật</a>
-                <a href="#">Chính sách bảo hành & đổi trả</a>
-                <a href="#">Các câu hỏi thường gặp</a>
-                <a href="#">Liên hệ với chúng tôi</a>
-            </div>
-        </div>
-    </div>
-    <div style="border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 13px; color: #999;">
-        <p>Copyright © 2025 <span style="color: #fff; font-weight: bold;">UMACT.vn</span> • Developed by <span style="color: #ccc;">CongTung202</span></p>
-    </div>
-</footer>
+<div th:replace="~{fragments/nct-footer :: footer}"></div>
 
 </body>
 </html>
