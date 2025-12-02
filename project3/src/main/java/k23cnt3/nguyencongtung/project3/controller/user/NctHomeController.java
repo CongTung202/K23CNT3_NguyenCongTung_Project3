@@ -68,7 +68,7 @@ package k23cnt3.nguyencongtung.project3.controller.user;
             model.addAttribute("nctProductsByCategory", nctProductsByCategory);
             model.addAttribute("nctCategoryUrls", nctCategoryUrls);
             model.addAttribute("nctFeaturedProducts", nctFeaturedProducts);
-            model.addAttribute("nctPageTitle", "OTAKU.vn - Figure Chính Hãng Nhật Bản");
+            model.addAttribute("nctPageTitle", "UmaCT - Ngựa thật việc thật");
 
             return "user/nct-home";
         }
@@ -76,14 +76,14 @@ package k23cnt3.nguyencongtung.project3.controller.user;
         @GetMapping("/about")
         public String nctAboutPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
             addCommonAttributes(model, userDetails);
-            model.addAttribute("nctPageTitle", "Giới thiệu - OTAKU.vn");
+            model.addAttribute("nctPageTitle", "Giới thiệu - UmaCT");
             return "user/nct-about";
         }
 
         @GetMapping("/contact")
         public String nctContactPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
             addCommonAttributes(model, userDetails);
-            model.addAttribute("nctPageTitle", "Liên hệ - OTAKU.vn");
+            model.addAttribute("nctPageTitle", "Liên hệ - UmaCT");
             return "user/nct-contact";
         }
     }
