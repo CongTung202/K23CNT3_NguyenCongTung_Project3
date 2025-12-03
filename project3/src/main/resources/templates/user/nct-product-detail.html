@@ -21,11 +21,17 @@
 <main class="main-content">
     <div class="product-detail-wrapper">
         <!-- Product Images -->
-        <div class="product-images">
+        <div class="product-image-container">
             <div class="main-image">
                 <img th:src="${nctProduct.nctImageUrl}" th:alt="${nctProduct.nctProductName}" id="mainProductImage">
+                <!-- Wishlist Button -->
+                <button class="btn-wishlist" th:onclick="'addToWishlist(' + ${nctProduct.nctProductId} + ')'" title="Thêm vào yêu thích">
+                    <i class="far fa-heart"></i>
+                </button>
             </div>
         </div>
+
+
 
         <!-- Product Info -->
         <div class="product-info-detail">
@@ -185,6 +191,37 @@
             }, 300);
         }, 3000);
     }
+function addToWishlist(productId) {
+    fetch('/wishlist/add', {
+        method: 'POST',
+        headers: getCsrfHeaders(),
+        body: `productId=${productId}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err; });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            const wishlistBtn = document.querySelector('.btn-wishlist');
+            if(wishlistBtn) {
+                wishlistBtn.classList.add('active');
+                wishlistBtn.querySelector('i').classList.replace('far', 'fas');
+            }
+        } else {
+            showToast(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const errorMessage = error.message || 'Không thể thêm vào danh sách yêu thích.';
+        showToast(errorMessage, 'error');
+    });
+}
+
 </script>
 
 </body>

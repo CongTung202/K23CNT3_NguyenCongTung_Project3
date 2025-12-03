@@ -511,6 +511,43 @@ footer a:hover { color: #fff; }
     display: flex;
     gap: 15px;
 }
+/* src/main/resources/static/css/nct-user-style.css */
+
+.product-image-container {
+    position: relative;
+    flex: 0 0 55%; /* Match the width of product-images */
+}
+
+.btn-wishlist {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    font-size: 18px;
+    color: #333;
+}
+
+.btn-wishlist:hover {
+    background-color: #fff;
+    color: #ff3333;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-wishlist.active {
+    color: #ff3333;
+}
+
 .thumbnail-list {
     display: none; /* Hide thumbnail list */
 }
@@ -531,7 +568,9 @@ footer a:hover { color: #fff; }
     height: 100%;
     object-fit: cover;
 }
+/* src/main/resources/static/css/nct-user-style.css */
 .main-image {
+    position: relative; /* Add this for positioning context */
     height: 570px;
     aspect-ratio: 3 / 5;
     display: flex;
@@ -851,4 +890,46 @@ footer a:hover { color: #fff; }
     transform: scaleX(-1) scale(2.0);
     /* Set the transform origin to the top-center to keep it in view */
     transform-origin: top center;
+}
+/* src/main/resources/static/css/nct-user-style.css */
+
+/* --- Wishlist Page --- */
+.product-card .product-actions {
+    display: flex;
+    border-top: 1px solid #f0f0f0;
+}
+
+.product-card .wishlist-form {
+    flex: 1;
+    display: flex; /* Make form take up full space */
+}
+
+.product-card .btn-wishlist-action {
+    flex: 1; /* Make button take up full space of the form */
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.product-card .btn-wishlist-action.btn-add-to-cart {
+    color: #27ae60; /* Green */
+    border-right: 1px solid #f0f0f0;
+}
+.product-card .btn-wishlist-action.btn-add-to-cart:hover {
+    background-color: #e9f7ef;
+}
+
+.product-card .btn-wishlist-action.btn-remove-from-wishlist {
+    color: #e74c3c; /* Red */
+}
+.product-card .btn-wishlist-action.btn-remove-from-wishlist:hover {
+    background-color: #fceae9;
 }
