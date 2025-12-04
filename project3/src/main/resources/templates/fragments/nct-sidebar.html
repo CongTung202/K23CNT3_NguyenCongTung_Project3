@@ -41,6 +41,15 @@
     </div>
 
     <!-- Social Links -->
+    <a th:href="@{/contact}" th:class="${activePage == 'contact' ? 'sidebar-item active' : 'sidebar-item'}">
+        <i class="fa-solid fa-phone"></i>
+        <span>Liên hệ</span>
+    </a>
+    <a th:href="@{/about}" th:class="${activePage == 'about' ? 'sidebar-item active' : 'sidebar-item'}">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Về chúng tôi</span>
+    </a>
+
     <a href="https://www.facebook.com/kobachan123" class="sidebar-item">
         <i class="fab fa-facebook"></i>
         <span>Facebook</span>
