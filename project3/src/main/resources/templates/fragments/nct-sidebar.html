@@ -39,17 +39,7 @@
         </a>
         <hr class="my-3 border-gray-200">
     </div>
-
-    <!-- Social Links -->
-    <a th:href="@{/contact}" th:class="${activePage == 'contact' ? 'sidebar-item active' : 'sidebar-item'}">
-        <i class="fa-solid fa-phone"></i>
-        <span>Liên hệ</span>
-    </a>
-    <a th:href="@{/about}" th:class="${activePage == 'about' ? 'sidebar-item active' : 'sidebar-item'}">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Về chúng tôi</span>
-    </a>
-
+    <!-- Social Media Links -->
     <a href="https://www.facebook.com/kobachan123" class="sidebar-item">
         <i class="fab fa-facebook"></i>
         <span>Facebook</span>
@@ -58,7 +48,19 @@
         <i class="fab fa-facebook-messenger"></i>
         <span>Messenger</span>
     </a>
-
+    <hr class="my-3 border-gray-200">
+    <a th:href="@{/contact}" th:class="${activePage == 'contact' ? 'sidebar-item active' : 'sidebar-item'}">
+        <i class="fa-solid fa-phone"></i>
+        <span>Liên hệ</span>
+    </a>
+    <a th:href="@{/about}" th:class="${activePage == 'about' ? 'sidebar-item active' : 'sidebar-item'}">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Về chúng tôi</span>
+    </a>
+    <a th:href="@{/policy}" th:class="${activePage == 'policy' ? 'sidebar-item active' : 'sidebar-item'}">
+        <i class="fa-solid fa-wrench"></i>
+        <span>Chính sách</span>
+    </a>
     <!-- Admin Dashboard Link (Visible only to Admins) -->
     <div sec:authorize="hasRole('ADMIN')">
         <hr class="my-3 border-gray-200">

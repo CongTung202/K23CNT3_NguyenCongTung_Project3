@@ -86,4 +86,10 @@ package k23cnt3.nguyencongtung.project3.controller.user;
             model.addAttribute("nctPageTitle", "Liên hệ - UmaCT");
             return "user/nct-contact";
         }
+        @GetMapping("/policy")
+        public String nctPolicyPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+            addCommonAttributes(model, userDetails);
+            model.addAttribute("nctPageTitle", "Chính sách Bảo hành & Đổi trả - UmaCT");
+            return "user/nct-policy";
+        }
     }
