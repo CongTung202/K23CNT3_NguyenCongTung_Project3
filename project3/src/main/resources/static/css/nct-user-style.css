@@ -499,10 +499,11 @@ footer a:hover { color: #fff; }
     background-color: #fff;
 }
 
+/* src/main/resources/static/css/nct-user-style.css */
 /* --- Product Detail Page --- */
 .product-detail-wrapper {
     display: flex;
-    /* The 'gap' property is removed to use margin on the child element instead */
+    gap: 20px; /* Controls the space between image and info. You can change this to 10px or your desired value. */
     background-color: #fff;
     padding: 30px;
     border-radius: 8px;
@@ -516,7 +517,7 @@ footer a:hover { color: #fff; }
 
 .product-image-container {
     position: relative;
-    flex: 0 0 55%; /* Match the width of product-images */
+
 }
 
 .btn-wishlist {
@@ -590,7 +591,6 @@ footer a:hover { color: #fff; }
 }
 .product-info-detail {
     flex: 1; /* Allows the element to fill the available space */
-    margin-left: -60px; /* Creates a 10px gap from the adjacent element */
 }
 .product-info-detail h1 {
     font-size: 24px;
@@ -598,6 +598,7 @@ footer a:hover { color: #fff; }
     margin-bottom: 15px;
     color: #000;
 }
+
 .product-price-detail {
     font-size: 32px;
     color: #ff3333;
@@ -764,13 +765,13 @@ footer a:hover { color: #fff; }
     padding-bottom: 15px;
     border-bottom: 2px solid #ff3333;
 }
-
+/* src/main/resources/static/css/nct-user-style.css */
 /* ==========================================================================
    5. Responsive Styles
    ========================================================================== */
-@media (max-width: 1200px) {
+@media (max-width: 1440px) {
     .character-guide-container {
-        display: none;
+        display: none !important; /* Ensure this rule is applied */
     }
     .main-content, footer {
         margin-right: 0;
@@ -803,6 +804,7 @@ footer a:hover { color: #fff; }
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
 
 /* ==========================================================================
    6. Character Guide Component
