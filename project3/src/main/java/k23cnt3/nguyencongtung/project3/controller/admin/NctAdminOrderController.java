@@ -3,6 +3,10 @@ package k23cnt3.nguyencongtung.project3.controller.admin;
 import k23cnt3.nguyencongtung.project3.entity.NctOrder;
 import k23cnt3.nguyencongtung.project3.service.NctOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,14 +28,37 @@ public class NctAdminOrderController {
     }
 
     @GetMapping
-    public String listOrders(Model model) {
-        List<NctOrder> orders = nctOrderService.nctGetAllOrders();
-        model.addAttribute("nctOrders", orders);
+    public String listOrders(Model model,
+                             @RequestParam(name = "status", required = false) String statusStr,
+                             @RequestParam(name = "keyword", required = false) String keyword,
+                             @RequestParam(name = "page", defaultValue = "1") int page,
+                             @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        NctOrder.NctOrderStatus status = null;
+        if (statusStr != null && !statusStr.isEmpty()) {
+            try {
+                status = NctOrder.NctOrderStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Invalid status, ignore it
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("nctCreatedAt").descending());
+        Page<NctOrder> orderPage = nctOrderService.nctFindPaginated(status, keyword, pageable);
+
+        model.addAttribute("nctOrderPage", orderPage);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", orderPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", statusStr);
+
+        // Status counts for the cards
         model.addAttribute("nctPendingCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.PENDING));
         model.addAttribute("nctConfirmedCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.CONFIRMED));
         model.addAttribute("nctShippingCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.SHIPPING));
         model.addAttribute("nctDeliveredCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.DELIVERED));
         model.addAttribute("nctCancelledCount", nctOrderService.nctGetOrderCountByStatus(NctOrder.NctOrderStatus.CANCELLED));
+
         return "admin/orders/nct-order-list";
     }
 

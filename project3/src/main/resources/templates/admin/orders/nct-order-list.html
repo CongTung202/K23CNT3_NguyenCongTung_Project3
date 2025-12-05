@@ -68,6 +68,35 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
+    <!-- Search and Filter Form -->
+    <div class="card nct-card mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/orders}" method="get" class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm theo tên khách hàng hoặc mã ĐH..." th:value="${keyword}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                        <select name="status" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option th:each="s : ${T(k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus).values()}"
+                                    th:value="${s.name()}"
+                                    th:text="${s.displayName}"
+                                    th:selected="${status != null and status.equalsIgnoreCase(s.name())}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Orders Table -->
     <div class="card nct-card">
         <div class="card-body p-0">
@@ -84,7 +113,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="order : ${nctOrders}">
+                    <tr th:each="order : ${nctOrderPage.content}">
                         <td class="fw-bold" th:text="'#' + ${order.nctOrderId}"></td>
                         <td th:text="${order.nctUser.nctFullName}"></td>
                         <td th:text="${#temporals.format(order.nctCreatedAt, 'dd/MM/yyyy HH:mm')}"></td>
@@ -109,11 +138,33 @@
     </div>
 
     <!-- Empty State -->
-    <div th:if="${nctOrders.empty}" class="text-center py-5">
-        <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
-        <h4 class="text-muted">Chưa có đơn hàng nào</h4>
-        <p class="text-muted">Đơn hàng sẽ xuất hiện ở đây khi khách hàng đặt hàng</p>
+    <div th:if="${nctOrderPage.empty}" class="text-center py-5">
+        <i class="fas fa-search-minus fa-4x text-muted mb-3"></i>
+        <h4 class="text-muted">Không tìm thấy đơn hàng nào</h4>
+        <p class="text-muted">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
     </div>
+
+    <!-- Pagination -->
+    <nav th:if="${nctOrderPage.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Page Link -->
+            <li class="page-item" th:classappend="${nctOrderPage.isFirst()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/orders(page=${currentPage - 1}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}">Trước</a>
+            </li>
+
+            <!-- Page Numbers -->
+            <th:block th:each="i : ${#numbers.sequence(1, nctOrderPage.totalPages)}">
+                <li class="page-item" th:if="${i >= currentPage - 2 and i <= currentPage + 2}" th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/admin/orders(page=${i}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}" th:text="${i}"></a>
+                </li>
+            </th:block>
+
+            <!-- Next Page Link -->
+            <li class="page-item" th:classappend="${nctOrderPage.isLast()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/orders(page=${currentPage + 1}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}">Sau</a>
+            </li>
+        </ul>
+    </nav>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

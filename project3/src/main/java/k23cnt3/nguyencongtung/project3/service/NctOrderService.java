@@ -4,6 +4,8 @@ import k23cnt3.nguyencongtung.project3.entity.*;
 import k23cnt3.nguyencongtung.project3.repository.NctOrderRepository;
 import k23cnt3.nguyencongtung.project3.repository.NctOrderItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -255,6 +257,11 @@ public class NctOrderService implements NctOrderServiceInterface {
     @Override
     public List<NctOrder> nctGetOrdersByStatus(NctOrder.NctOrderStatus status) {
         return nctOrderRepository.findByNctStatusOrderByNctCreatedAtDesc(status);
+    }
+
+    @Override
+    public Page<NctOrder> nctFindPaginated(NctOrder.NctOrderStatus status, String keyword, Pageable pageable) {
+        return nctOrderRepository.findWithFiltersAndPagination(status, keyword, pageable);
     }
 
     public List<NctOrder> nctGetOrdersByUserId(Long userId) {

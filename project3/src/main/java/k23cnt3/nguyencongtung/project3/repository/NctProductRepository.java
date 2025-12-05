@@ -2,6 +2,8 @@ package k23cnt3.nguyencongtung.project3.repository;
 
 import k23cnt3.nguyencongtung.project3.entity.NctCategory;
 import k23cnt3.nguyencongtung.project3.entity.NctProduct;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,9 @@ import java.util.List;
 
 @Repository
 public interface NctProductRepository extends JpaRepository<NctProduct, Long> {
+
+    // Find by name for pagination
+    Page<NctProduct> findByNctProductNameContainingIgnoreCase(String nctProductName, Pageable pageable);
 
     // Tìm sản phẩm theo danh mục
     List<NctProduct> findByNctCategory(NctCategory nctCategory);

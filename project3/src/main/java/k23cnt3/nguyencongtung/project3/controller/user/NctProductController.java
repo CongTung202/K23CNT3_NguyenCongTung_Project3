@@ -51,6 +51,7 @@ public class NctProductController {
     public String nctProductsPage(
             @RequestParam(value = "category", required = false) Long nctCategoryId,
             @RequestParam(value = "search", required = false) String nctSearchKeyword,
+            @RequestParam(value = "sort", required = false) String sort,
             Model model, @AuthenticationPrincipal UserDetails userDetails) {
 
         addCommonAttributes(model, userDetails);
@@ -72,10 +73,14 @@ public class NctProductController {
             nctProducts = nctProductService.nctGetActiveProducts();
         }
 
+        // Apply sorting if requested
+        nctProducts = nctProductService.nctSortProducts(nctProducts, sort);
+
         model.addAttribute("nctProducts", nctProducts);
         model.addAttribute("nctCategories", nctCategoryService.nctGetCategoriesWithActiveProducts());
         model.addAttribute("nctHeaderTitle", nctHeaderTitle);
         model.addAttribute("nctPageTitle", nctHeaderTitle + " - UMACT Store");
+        model.addAttribute("nctSort", sort);
 
         return "user/nct-products";
     }

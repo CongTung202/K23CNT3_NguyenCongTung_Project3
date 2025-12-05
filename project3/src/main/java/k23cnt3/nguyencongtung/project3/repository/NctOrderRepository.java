@@ -2,8 +2,11 @@ package k23cnt3.nguyencongtung.project3.repository;
 
 import k23cnt3.nguyencongtung.project3.entity.NctOrder;
 import k23cnt3.nguyencongtung.project3.entity.NctUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -27,4 +30,11 @@ public interface NctOrderRepository extends JpaRepository<NctOrder, Long> {
 
     @Query("SELECT SUM(o.nctTotalAmount) FROM NctOrder o WHERE o.nctStatus = k23cnt3.nguyencongtung.project3.entity.NctOrder.NctOrderStatus.DELIVERED")
     Double getTotalRevenue();
+
+    @Query("SELECT o FROM NctOrder o WHERE " +
+            "(:status IS NULL OR o.nctStatus = :status) AND " +
+            "(:keyword IS NULL OR LOWER(o.nctUser.nctFullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR CAST(o.nctOrderId AS string) LIKE CONCAT('%', :keyword, '%'))")
+    Page<NctOrder> findWithFiltersAndPagination(@Param("status") NctOrder.NctOrderStatus status,
+                                                @Param("keyword") String keyword,
+                                                Pageable pageable);
 }

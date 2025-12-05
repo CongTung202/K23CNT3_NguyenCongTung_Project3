@@ -6,6 +6,9 @@ import k23cnt3.nguyencongtung.project3.service.NctProductService;
 import k23cnt3.nguyencongtung.project3.service.NctCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,9 +42,15 @@ public class NctAdminProductController {
 
     // GET: Hiển thị danh sách sản phẩm
     @GetMapping
-    public String nctProductList(Model model) {
-        List<NctProduct> nctProducts = nctProductService.nctGetAllProducts();
-        model.addAttribute("nctProducts", nctProducts);
+    public String nctProductList(Model model,
+                                 @RequestParam(name = "keyword", required = false) String keyword,
+                                 @RequestParam(name = "page", defaultValue = "0") int page,
+                                 @RequestParam(name = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NctProduct> nctProductPage = nctProductService.nctFindPaginated(keyword, pageable);
+
+        model.addAttribute("nctProductPage", nctProductPage);
+        model.addAttribute("nctKeyword", keyword);
         model.addAttribute("nctPageTitle", "Danh sách Sản phẩm - Admin");
         return "admin/products/nct-product-list";
     }

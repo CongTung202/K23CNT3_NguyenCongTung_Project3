@@ -4,13 +4,15 @@ import k23cnt3.nguyencongtung.project3.entity.NctCategory;
 import k23cnt3.nguyencongtung.project3.entity.NctProduct;
 import k23cnt3.nguyencongtung.project3.repository.NctProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,13 @@ public class NctProductService {
     @Autowired
     public NctProductService(NctProductRepository nctProductRepository) {
         this.nctProductRepository = nctProductRepository;
+    }
+
+    public Page<NctProduct> nctFindPaginated(String keyword, Pageable pageable) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return nctProductRepository.findByNctProductNameContainingIgnoreCase(keyword, pageable);
+        }
+        return nctProductRepository.findAll(pageable);
     }
 
     // Lấy tất cả sản phẩm
@@ -171,5 +180,36 @@ public class NctProductService {
         return nctGetAllProducts().stream()
                 .filter(p -> p.getNctCreatedAt() != null && !p.getNctCreatedAt().isBefore(start) && p.getNctCreatedAt().isBefore(end))
                 .count();
+    }
+
+    /**
+     * Sort a given list of products by the provided sort key.
+     * sort values: "priceAsc", "priceDesc", "newest" (default: no change)
+     */
+    public List<NctProduct> nctSortProducts(List<NctProduct> products, String sort) {
+        if (products == null || products.isEmpty() || sort == null || sort.isBlank()) {
+            return products;
+        }
+
+        // Work on a copy to avoid side-effects
+        List<NctProduct> sorted = new ArrayList<>(products);
+
+        switch (sort) {
+            case "priceAsc":
+                sorted.sort(Comparator.comparing(p -> p.getNctPrice() == null ? BigDecimal.ZERO : p.getNctPrice()));
+                break;
+            case "priceDesc":
+                sorted.sort(Comparator.comparing((NctProduct p) -> p.getNctPrice() == null ? BigDecimal.ZERO : p.getNctPrice()).reversed());
+                break;
+            case "newest":
+                // Newest first -> sort by createdAt descending (nulls last)
+                sorted.sort(Comparator.comparing(NctProduct::getNctCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+                break;
+            default:
+                // unknown sort -> no change
+                break;
+        }
+
+        return sorted;
     }
 }
