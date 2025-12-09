@@ -38,13 +38,17 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="nctPrice" class="form-label">Giá bán *</label>
-                                <input type="number" class="form-control" id="nctPrice" th:field="*{nctPrice}" min="0" required>
+                                <label for="nctOriginalPrice" class="form-label">Giá gốc</label>
+                                <input type="number" step="any" class="form-control" id="nctOriginalPrice" th:field="*{nctOriginalPrice}" min="0" placeholder="Để trống nếu không giảm giá">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nctStockQuantity" class="form-label">Số lượng tồn kho *</label>
-                                <input type="number" class="form-control" id="nctStockQuantity" th:field="*{nctStockQuantity}" min="0" required>
+                                <label for="nctPrice" class="form-label">Giá bán (sau giảm giá) *</label>
+                                <input type="number" step="any" class="form-control" id="nctPrice" th:field="*{nctPrice}" min="0" required>
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nctStockQuantity" class="form-label">Số lượng tồn kho *</label>
+                            <input type="number" class="form-control" id="nctStockQuantity" th:field="*{nctStockQuantity}" min="0" required>
                         </div>
                     </div>
                 </div>
@@ -105,6 +109,6 @@
     </form>
 </main>
 
-<script src="https://cdn.jsdelivr/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

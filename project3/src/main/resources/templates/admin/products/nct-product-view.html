@@ -74,6 +74,10 @@
                             <strong>Danh mục</strong>
                             <span th:text="${nctProduct.nctCategory?.nctCategoryName} ?: 'N/A'"></span>
                         </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center" th:if="${nctProduct.nctOriginalPrice != null and nctProduct.nctOriginalPrice.doubleValue() > 0}">
+                            <strong>Giá gốc</strong>
+                            <span class="text-muted text-decoration-line-through" th:text="'₫' + ${#numbers.formatDecimal(nctProduct.nctOriginalPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+                        </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <strong>Giá bán</strong>
                             <span class="fw-bold text-danger" th:text="'₫' + ${#numbers.formatDecimal(nctProduct.nctPrice, 0, 'COMMA', 0, 'POINT')}"></span>

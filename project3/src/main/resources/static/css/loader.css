@@ -1,0 +1,67 @@
+/* Lớp phủ toàn màn hình */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999; /* Luôn nằm trên cùng */
+
+    /* Màu nền bán trong suốt để thấy được hiệu ứng mờ phía sau */
+    background-color: linear-gradient(135deg, rgba(255, 51, 51, 0.95), rgba(220, 20, 60, 0.95));;
+
+    /* Hiệu ứng làm mờ trang hiện tại (nội dung bên dưới loader) */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Hỗ trợ Safari */
+
+    /* Căn giữa nội dung */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    /* Hiệu ứng chuyển động khi biến mất */
+    transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+/* Style cho hình ảnh */
+#preloader img {
+    width: 200px; /* Điều chỉnh kích thước ảnh tùy ý */
+    height: auto;
+    margin-bottom: 20px;
+}
+
+/* 2. Chữ Welcome - STYLE MỚI */
+        #preloader h2 {
+            font-family: 'Arial Black', 'Impact', sans-serif; /* Font dày và mạnh mẽ */
+            font-size: 40px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #ff3333;
+            margin: 0;
+            position: relative;
+            /* Animation xuất hiện: Trượt từ dưới lên */
+            animation: slideUpFade 0.8s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+        }
+        /* === KEYFRAMES === */
+
+        /* Animation chữ trượt lên */
+        @keyframes slideUpFade {
+            0% {
+                transform: translateY(40px);
+                opacity: 0;
+                letter-spacing: 10px; /* Chữ gom lại từ xa */
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+                letter-spacing: 4px;
+            }
+        }
+
+
+/* Class để ẩn loader */
+.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
