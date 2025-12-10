@@ -27,6 +27,9 @@ public class NctSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/payment/**","/api/zalopay/**")
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers(
@@ -37,7 +40,9 @@ public class NctSecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/api/payment/**", //cho phep bo qua dag nhap tam thoi de test
+                                "/api/zalopay/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

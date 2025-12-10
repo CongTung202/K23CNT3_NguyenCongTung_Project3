@@ -1,67 +1,64 @@
-/* Lớp phủ toàn màn hình */
 #preloader {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 9999; /* Luôn nằm trên cùng */
+    z-index: 9999;
 
-    /* Màu nền bán trong suốt để thấy được hiệu ứng mờ phía sau */
-    background-color: linear-gradient(135deg, rgba(255, 51, 51, 0.95), rgba(220, 20, 60, 0.95));;
+    /* White background */
+    background-color: #ffffff;
 
-    /* Hiệu ứng làm mờ trang hiện tại (nội dung bên dưới loader) */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px); /* Hỗ trợ Safari */
+    /* Optional subtle backdrop blur */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 
-    /* Căn giữa nội dung */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    /* Hiệu ứng chuyển động khi biến mất */
-    transition: opacity 0.5s ease-out, visibility 0.5s;
+    /* Transition for sliding left */
+    transition: transform 1s cubic-bezier(0.22, 0.8, 0.2, 1), opacity 0.8s ease;
+    will-change: transform, opacity;
 }
 
-/* Style cho hình ảnh */
+/* Image */
 #preloader img {
-    width: 200px; /* Điều chỉnh kích thước ảnh tùy ý */
+    width: 200px;
     height: auto;
     margin-bottom: 20px;
 }
 
-/* 2. Chữ Welcome - STYLE MỚI */
-        #preloader h2 {
-            font-family: 'Arial Black', 'Impact', sans-serif; /* Font dày và mạnh mẽ */
-            font-size: 40px;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: #ff3333;
-            margin: 0;
-            position: relative;
-            /* Animation xuất hiện: Trượt từ dưới lên */
-            animation: slideUpFade 0.8s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-        }
-        /* === KEYFRAMES === */
+/* Heading */
+#preloader h2 {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 40px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #ff3333;
+    margin: 0;
+    position: relative;
+    animation: slideUpFade 0.8s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
 
-        /* Animation chữ trượt lên */
-        @keyframes slideUpFade {
-            0% {
-                transform: translateY(40px);
-                opacity: 0;
-                letter-spacing: 10px; /* Chữ gom lại từ xa */
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-                letter-spacing: 4px;
-            }
-        }
+/* Slide-up keyframes for the text */
+@keyframes slideUpFade {
+    0% {
+        transform: translateY(40px);
+        opacity: 0;
+        letter-spacing: 10px;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+        letter-spacing: 4px;
+    }
+}
 
-
-/* Class để ẩn loader */
+/* Hide by sliding left and fading slightly; don't set visibility immediately */
 .loader-hidden {
+    transform: translateX(-100%);
     opacity: 0;
-    visibility: hidden;
+    pointer-events: none; /* allow clicks to pass through while hiding */
 }

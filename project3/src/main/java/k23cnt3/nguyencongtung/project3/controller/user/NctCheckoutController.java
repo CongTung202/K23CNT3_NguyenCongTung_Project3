@@ -8,8 +8,8 @@ import k23cnt3.nguyencongtung.project3.service.NctCartService;
 import k23cnt3.nguyencongtung.project3.service.NctOrderService;
 import k23cnt3.nguyencongtung.project3.service.NctProductService;
 import k23cnt3.nguyencongtung.project3.service.NctUserService;
+import k23cnt3.nguyencongtung.project3.service.ZaloPayService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +29,19 @@ public class NctCheckoutController {
     private final NctUserService nctUserService;
     private final NctOrderService nctOrderService;
     private final NctProductService nctProductService;
+    private final ZaloPayService zaloPayService;
 
     @Autowired
-    public NctCheckoutController(NctCartService nctCartService, NctUserService nctUserService, NctOrderService nctOrderService, NctProductService nctProductService) {
+    public NctCheckoutController(NctCartService nctCartService,
+                                 NctUserService nctUserService,
+                                 NctOrderService nctOrderService,
+                                 NctProductService nctProductService,
+                                 ZaloPayService zaloPayService) {
         this.nctCartService = nctCartService;
         this.nctUserService = nctUserService;
         this.nctOrderService = nctOrderService;
         this.nctProductService = nctProductService;
+        this.zaloPayService = zaloPayService;
     }
 
     private NctUser getCurrentUser(UserDetails userDetails) {
@@ -61,6 +68,9 @@ public class NctCheckoutController {
         NctOrder order = new NctOrder();
         order.setNctShippingAddress(currentUser.getNctAddress());
         order.setNctPhone(currentUser.getNctPhone());
+
+        // SỬA LỖI 1: Gán bằng Enum, không phải String
+        order.setNctPaymentMethod(NctOrder.NctPaymentMethod.COD);
 
         model.addAttribute("nctCartItems", cartItems);
         model.addAttribute("nctTotal", total);
@@ -97,6 +107,9 @@ public class NctCheckoutController {
         order.setNctShippingAddress(currentUser.getNctAddress());
         order.setNctPhone(currentUser.getNctPhone());
 
+        // SỬA LỖI 2: Gán bằng Enum
+        order.setNctPaymentMethod(NctOrder.NctPaymentMethod.COD);
+
         model.addAttribute("nctCartItems", Collections.singletonList(tempCartItem));
         model.addAttribute("nctTotal", total);
         model.addAttribute("nctOrder", order);
@@ -109,30 +122,106 @@ public class NctCheckoutController {
     }
 
     @PostMapping("/checkout")
-    @ResponseBody
-    public ResponseEntity<?> nctProcessCheckout(@ModelAttribute("nctOrder") NctOrder nctOrderDetails,
-                                                @RequestParam(name = "isBuyNow", defaultValue = "false") boolean isBuyNow,
-                                                @RequestParam(name = "productId", required = false) Long productId,
-                                                @RequestParam(name = "quantity", required = false) Integer quantity,
-                                                @AuthenticationPrincipal UserDetails userDetails) {
+    public String nctProcessCheckout(@ModelAttribute("nctOrder") NctOrder nctOrderDetails,
+                                     @RequestParam(name = "isBuyNow", defaultValue = "false") boolean isBuyNow,
+                                     @RequestParam(name = "productId", required = false) Long productId,
+                                     @RequestParam(name = "quantity", required = false) Integer quantity,
+                                     @AuthenticationPrincipal UserDetails userDetails,
+                                     Model model) {
+
         NctUser currentUser = getCurrentUser(userDetails);
         if (currentUser == null) {
-            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Vui lòng đăng nhập."));
+            return "redirect:/login";
         }
 
+        String viewName = "user/nct-checkout";
+
         try {
+            // 1. Tính toán tổng tiền
+            double amount = 0;
             if (isBuyNow) {
-                if (productId == null || quantity == null) {
-                    return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Thiếu thông tin sản phẩm."));
+                if (productId == null || quantity == null) throw new RuntimeException("Thiếu thông tin sản phẩm mua ngay.");
+                NctProduct product = nctProductService.nctGetProductById(productId).orElseThrow();
+                amount = product.getNctPrice().doubleValue() * quantity;
+            } else {
+                amount = nctCartService.nctCalculateCartTotal(currentUser);
+            }
+
+            // 2. KIỂM TRA PHƯƠNG THỨC THANH TOÁN
+            if (nctOrderDetails.getNctPaymentMethod() == NctOrder.NctPaymentMethod.BANKING) {
+
+                // B1: Lưu đơn hàng trước để có ID
+                NctOrder savedOrder; // Khai báo biến hứng đơn hàng đã lưu
+                if (isBuyNow) {
+                    savedOrder = nctOrderService.nctCreateOrderFromSingleProduct(currentUser, productId, quantity,
+                            nctOrderDetails.getNctShippingAddress(), nctOrderDetails.getNctPhone(), NctOrder.NctPaymentMethod.BANKING);
+                } else {
+                    savedOrder = nctOrderService.nctCreateOrderFromCart(currentUser, nctOrderDetails);
                 }
+
+                // B2: Tạo đường dẫn quay về (Trang chi tiết đơn hàng)
+                // Lưu ý: Thay "localhost:8080" bằng domain thật khi deploy
+                String returnUrl = "http://localhost:8080/payment/callback?nctOrderId=" + savedOrder.getNctOrderId();
+
+                // B3: Gọi ZaloPay Service kèm returnUrl
+                Map<String, Object> zaloPayResult = zaloPayService.createOrder((int) amount, returnUrl);
+
+                if (zaloPayResult.containsKey("orderUrl")) {
+                    return "redirect:" + zaloPayResult.get("orderUrl").toString();
+                } else {
+                    throw new RuntimeException("Lỗi tạo link thanh toán ZaloPay: " + zaloPayResult.get("error"));
+                }
+            }
+
+            // 3. XỬ LÝ THANH TOÁN THƯỜNG (COD)
+            if (isBuyNow) {
                 nctOrderService.nctCreateOrderFromSingleProduct(currentUser, productId, quantity,
                         nctOrderDetails.getNctShippingAddress(), nctOrderDetails.getNctPhone(), nctOrderDetails.getNctPaymentMethod());
             } else {
                 nctOrderService.nctCreateOrderFromCart(currentUser, nctOrderDetails);
             }
-            return ResponseEntity.ok(Map.of("success", true, "message", "Đặt hàng thành công!", "redirectUrl", "/orders"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+
+            model.addAttribute("notificationStatus", "success");
+            model.addAttribute("notificationMessage", "Đặt hàng thành công!");
+            model.addAttribute("redirectUrl", "/orders"); // Chuyển hướng về danh sách đơn hàng
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("notificationStatus", "failure");
+            model.addAttribute("notificationMessage", "LỖI: " + e.getMessage());
+            model.addAttribute("redirectUrl", null);
         }
+
+        // --- NẠP LẠI DỮ LIỆU ĐỂ HIỂN THỊ GIAO DIỆN KHI CÓ LỖI HOẶC LOAD LẠI ---
+        if (isBuyNow && productId != null) {
+            try {
+                NctProduct product = nctProductService.nctGetProductById(productId).orElse(null);
+                if (product != null) {
+                    NctCartItem tempCartItem = new NctCartItem();
+                    tempCartItem.setNctProduct(product);
+                    tempCartItem.setNctQuantity(quantity != null ? quantity : 1);
+                    double total = product.getNctPrice().doubleValue() * tempCartItem.getNctQuantity();
+
+                    model.addAttribute("nctCartItems", Collections.singletonList(tempCartItem));
+                    model.addAttribute("nctTotal", total);
+                    model.addAttribute("buyNowProductId", productId);
+                    model.addAttribute("buyNowQuantity", quantity);
+                }
+            } catch (Exception ex) {
+                model.addAttribute("nctCartItems", new ArrayList<>());
+                model.addAttribute("nctTotal", 0);
+            }
+        } else {
+            List<NctCartItem> cartItems = nctCartService.nctGetCartItems(currentUser);
+            double total = nctCartService.nctCalculateCartTotal(currentUser);
+            model.addAttribute("nctCartItems", cartItems);
+            model.addAttribute("nctTotal", total);
+        }
+
+        model.addAttribute("nctPageTitle", isBuyNow ? "Thanh toán Mua ngay" : "Thanh toán");
+        model.addAttribute("isBuyNow", isBuyNow);
+        model.addAttribute("nctOrder", nctOrderDetails);
+
+        return viewName;
     }
 }
