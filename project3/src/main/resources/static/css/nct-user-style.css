@@ -15,6 +15,35 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    cursor: url('/images/cursor(1).png') 0 0, auto;
+}
+/* Các thành phần Click được -> Chuyển sang Custom Cursor dạng bàn tay */
+a,
+button,
+.filter-options,
+.product-card,      /* Thêm vào */
+.sidebar-item,      /* Thêm vào */
+.thumbnail-item,    /* Thêm vào */
+.btn,               /* Thêm vào */
+.btn-wishlist,      /* Thêm vào */
+.quantity-btn,      /* Thêm vào */
+.filter-btn,        /* Thêm vào */
+label               /* Thêm vào cho checkbox/radio */
+{
+    /* SỬA ĐỔI: Thêm tọa độ hotspot */
+    /* Nếu ảnh bàn tay 32x32 và ngón trỏ ở giữa, hãy đặt là 16 16 */
+    /* Nếu ngón trỏ ở góc trái trên, đặt là 0 0 */
+    cursor: url('/images/hand-pointer(2).png') 0 0, pointer;
+}
+
+/* QUAN TRỌNG: Giữ nguyên con trỏ soạn thảo cho ô nhập liệu */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+textarea,
+.form-input {
+    cursor: text;
 }
 
 /* ==========================================================================
@@ -177,7 +206,6 @@ footer a:hover { color: #fff; }
     border-radius: 8px;
     overflow: hidden;
     transition: all 0.3s ease;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
 }
@@ -489,7 +517,6 @@ footer a:hover { color: #fff; }
     border: 1px solid #ddd;
     background-color: #fafafa;
     border-radius: 6px;
-    cursor: pointer;
     font-size: 13px;
     transition: all 0.3s ease;
 }
@@ -532,7 +559,6 @@ footer a:hover { color: #fff; }
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
     transition: all 0.3s ease;
     z-index: 10;
     font-size: 18px;
@@ -559,7 +585,6 @@ footer a:hover { color: #fff; }
     border: 2px solid #ddd;
     border-radius: 4px;
     overflow: hidden;
-    cursor: pointer;
     transition: all 0.3s ease;
 }
 .thumbnail-item:hover, .thumbnail-item.active {
@@ -673,7 +698,6 @@ footer a:hover { color: #fff; }
     height: 38px; /* Match input height */
     background-color: #f9f9f9;
     border: none;
-    cursor: pointer;
     font-size: 18px;
     color: #555;
     transition: background-color 0.2s;
@@ -699,7 +723,6 @@ footer a:hover { color: #fff; }
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    cursor: pointer;
     transition: all 0.3s ease;
     border: none;
     flex-grow: 1;
@@ -913,7 +936,6 @@ footer a:hover { color: #fff; }
     font-size: 13px;
     font-weight: 600;
     border: none;
-    cursor: pointer;
     background-color: transparent;
     transition: background-color 0.2s ease;
     display: flex;
