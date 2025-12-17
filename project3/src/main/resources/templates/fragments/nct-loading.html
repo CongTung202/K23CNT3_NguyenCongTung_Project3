@@ -12,24 +12,33 @@
     </div>
 
     <script>
-        window.addEventListener("load", function () {
-            const loader = document.getElementById("preloader");
+        // Sử dụng IIFE để thực thi ngay lập tức
+        (function() {
+            const hideLoader = function() {
+                const loader = document.getElementById("preloader");
+                if (loader) {
+                    loader.classList.add("loader-hidden");
 
-            // Wait 2000ms then slide out to the left
-            setTimeout(function() {
-                loader.classList.add("loader-hidden");
+                    // Xử lý xóa element sau khi hiệu ứng kết thúc
+                    const onTransitionEnd = function(event) {
+                        if (event.propertyName === 'transform' || event.propertyName === 'opacity') {
+                            loader.removeEventListener('transitionend', onTransitionEnd);
+                            loader.remove();
+                        }
+                    };
+                    loader.addEventListener("transitionend", onTransitionEnd);
 
-                // Remove element after transition completes
-                const onTransitionEnd = function(event) {
-                    // ensure we wait for the transform or opacity transition
-                    if (event.propertyName === 'transform' || event.propertyName === 'opacity') {
-                        loader.removeEventListener('transitionend', onTransitionEnd);
-                        loader.remove();
-                    }
-                };
-                loader.addEventListener("transitionend", onTransitionEnd);
-            }, 2000);
-        });
+                    // Dự phòng (fail-safe): Nếu transition không chạy, vẫn xóa sau 500ms nữa
+                    setTimeout(() => { if(loader.parentNode) loader.remove(); }, 600);
+                }
+            };
+
+            // THỰC THI: Tự động ẩn sau 1.5s bất kể trang tải xong hay chưa
+            setTimeout(hideLoader, 1500);
+
+            // Hoặc nếu muốn ưu tiên khi trang tải xong sớm hơn 1.5s
+            // window.addEventListener("load", hideLoader);
+        })();
     </script>
 </div>
 

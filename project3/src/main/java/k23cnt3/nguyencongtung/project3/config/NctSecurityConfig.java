@@ -39,10 +39,12 @@ public class NctSecurityConfig {
                                 "/auth/**",
                                 "/css/**",
                                 "/js/**",
+                                "/uploads/**",
                                 "/images/**",
                                 "/webjars/**",
                                 "/api/payment/**", //cho phep bo qua dag nhap tam thoi de test
-                                "/api/zalopay/**"
+                                "/api/zalopay/**",
+                                "/loading"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -68,7 +68,9 @@ public class NctOrderController {
     }
 
     @PostMapping("/orders/cancel/{orderId}")
-    public String cancelOrder(@PathVariable Long orderId, RedirectAttributes redirectAttributes, @AuthenticationPrincipal UserDetails userDetails) {
+    public String cancelAndRemoveOrder(@PathVariable Long orderId,
+                                       RedirectAttributes redirectAttributes,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -78,15 +80,24 @@ public class NctOrderController {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng."));
 
             if (!order.getNctUser().getNctUserId().equals(nctUser.getNctUserId())) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền hủy đơn hàng này.");
+                redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền thao tác trên đơn hàng này.");
                 return "redirect:/orders";
             }
 
-            nctOrderService.nctCancelOrder(orderId);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã hủy đơn hàng #" + orderId + " thành công.");
+            // Bước 1: Hủy đơn để hoàn kho (nếu đơn đang ở trạng thái PENDING/CONFIRMED)
+            if (order.getNctStatus() == NctOrder.NctOrderStatus.PENDING ||
+                    order.getNctStatus() == NctOrder.NctOrderStatus.CONFIRMED) {
+                nctOrderService.nctCancelOrder(orderId);
+            }
+
+            // Bước 2: Thực hiện xóa đơn hàng
+            nctOrderService.nctDeleteOrder(orderId);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đơn hàng đã được xóa khỏi hệ thống.");
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi hủy đơn hàng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
         }
         return "redirect:/orders";
     }
+
 }
