@@ -81,15 +81,26 @@
                 <span class="font-semibold">Tổng cộng:</span>
                 <span class="text-red-500 font-bold" th:text="|₫${#numbers.formatDecimal(nctOrder.nctTotalAmount, 0, 'COMMA', 0, 'POINT')}|"></span>
             </div>
-            <div th:if="${nctOrder.nctStatus.name() == 'PENDING' || nctOrder.nctStatus.name() == 'CANCELLED'}" class="mt-6">
-                <form th:action="@{/orders/cancel/{id}(id=${nctOrder.nctOrderId})}" method="post"
-                      onsubmit="return confirm('Bạn có chắc chắn muốn hủy và xóa đơn hàng này? Thao tác này không thể hoàn tác.')">
-                    <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-200">
-                        Hủy và Xóa đơn hàng
-                    </button>
-                </form>
-            </div>
-        </div>
+            <div class="mt-6 flex flex-col gap-3">
+
+                <div th:if="${nctOrder.nctStatus.name() == 'CANCELLED' || nctOrder.nctStatus.name() == 'DELIVERED'}">
+                    <form th:action="@{/orders/buy-again/{id}(id=${nctOrder.nctOrderId})}" method="post">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200 shadow-md flex items-center justify-center">
+                            <i class="fas fa-shopping-cart mr-2"></i> Mua lại đơn hàng này
+                        </button>
+                    </form>
+                </div>
+
+                <div th:if="${nctOrder.nctStatus.name() == 'PENDING' || nctOrder.nctStatus.name() == 'CONFIRMED'}">
+                    <form th:action="@{/orders/cancel/{id}(id=${nctOrder.nctOrderId})}" method="post"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
+                        <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+                            <i class="fas fa-times mr-2"></i> Hủy đơn hàng
+                        </button>
+                    </form>
+                </div>
+
+            </div>        </div>
     </div>
 </main>
 <div th:replace="~{fragments/nct-chat-model :: nct-chat-model(pageContext='orders', contextProduct=null)}"></div>

@@ -92,10 +92,10 @@ package k23cnt3.nguyencongtung.project3.controller.user;
             model.addAttribute("nctPageTitle", "Chính sách Bảo hành & Đổi trả - UmaCT");
             return "user/nct-policy";
         }
-        @GetMapping("/loading")
+        @GetMapping("/giftbox")
         public String nctLoadingPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
             addCommonAttributes(model, userDetails);
-            model.addAttribute("nctPageTitle", "Chờ xử lý...");
-            return "fragments/nct-loading";
+            model.addAttribute("nctPageTitle", "Harikite Ikkou...");
+            return "fragments/nct-giftbox";
         }
     }
