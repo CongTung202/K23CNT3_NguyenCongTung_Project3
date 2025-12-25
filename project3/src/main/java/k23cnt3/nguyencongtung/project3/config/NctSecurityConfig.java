@@ -44,7 +44,9 @@ public class NctSecurityConfig {
                                 "/webjars/**",
                                 "/api/payment/**", //cho phep bo qua dag nhap tam thoi de test
                                 "/api/zalopay/**",
-                                "/loading"
+                                "/giftbox",
+                                "/error/**"
+
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
