@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -211,5 +213,37 @@ public class NctProductService {
         }
 
         return sorted;
+    }
+    public Page<NctProduct> nctGetProductsPaginated(int pageNo, int pageSize, String sort, Long categoryId, String keyword) {
+        // 1. Xử lý sắp xếp (Sort)
+        Sort sortable = Sort.unsorted();
+        if (sort != null) {
+            switch (sort) {
+                case "priceAsc":
+                    sortable = Sort.by("nctPrice").ascending();
+                    break;
+                case "priceDesc":
+                    sortable = Sort.by("nctPrice").descending();
+                    break;
+                case "newest":
+                default:
+                    sortable = Sort.by("nctCreatedAt").descending();
+                    break;
+            }
+        } else {
+            sortable = Sort.by("nctCreatedAt").descending();
+        }
+
+        // 2. Tạo đối tượng Pageable
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sortable);
+
+        // 3. Gọi Repository
+        if (keyword != null && !keyword.isEmpty()) {
+            return nctProductRepository.findByNctProductNameContainingIgnoreCaseAndNctStatus(keyword, NctProduct.NctStatus.ACTIVE, pageable);
+        } else if (categoryId != null) {
+            return nctProductRepository.findByNctCategory_NctCategoryIdAndNctStatus(categoryId, NctProduct.NctStatus.ACTIVE, pageable);
+        } else {
+            return nctProductRepository.findByNctStatus(NctProduct.NctStatus.ACTIVE, pageable);
+        }
     }
 }

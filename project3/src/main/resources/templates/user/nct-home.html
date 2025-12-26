@@ -73,8 +73,10 @@
         </div>
 
         <div class="product-grid">
-            <div th:each="product : ${nctProductsByCategory.get(category.nctCategoryName)}"
+            <div th:each="product, iterStat : ${nctProductsByCategory.get(category.nctCategoryName)}"
+                 th:if="${iterStat.index < 9}"
                  class="product-card">
+
                 <a th:href="@{/products/{id}(id=${product.nctProductId})}" style="text-decoration: none; color: inherit;">
                     <div class="product-image">
                         <img th:src="${product.nctImageUrl}"

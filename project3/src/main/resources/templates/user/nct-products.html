@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 </head>
 
-<body>
+<body style="margin-top: 55px;">
 <div th:replace="~{fragments/nct-header :: header}"></div>
 
 <div th:replace="~{fragments/nct-sidebar :: sidebar(activePage='products')}"></div>
@@ -28,7 +28,7 @@
         <div>
             <h1 th:text="${nctHeaderTitle}">Tất cả sản phẩm</h1>
             <p style="color: #999; margin-top: 5px;">
-                Tìm thấy <span th:text="${nctProducts.size()}">0</span> sản phẩm
+                Trang này hiện có <span th:text="${nctProducts.size()}">0</span> sản phẩm
             </p>
         </div>
         <div class="filter-options">
@@ -71,6 +71,37 @@
         <i class="fas fa-box-open"></i>
         <p>Không tìm thấy sản phẩm nào</p>
         <a th:href="@{/products}">Xem tất cả sản phẩm</a>
+    </div>
+    <div class="mt-8 flex justify-center" th:if="${totalPages > 1}">
+        <nav aria-label="Page navigation">
+            <ul class="flex list-style-none">
+
+                <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled pointer-events-none opacity-50'">
+                    <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
+                       th:href="@{/products(page=${currentPage - 1}, category=${nctSelectedCategoryId}, search=${nctSearchKeyword}, sort=${nctSort})}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(1, totalPages)}"
+                    th:style="${currentPage == i} ? 'background-color: #e74c3c; border-radius: 0.25rem;' : ''">
+
+                    <a class="page-link relative block py-1.5 px-3 border-0 outline-none transition-all duration-300 rounded hover:bg-gray-200 focus:shadow-none"
+                       th:style="${currentPage == i} ? 'color: white;' : 'color: #1f2937;'"
+                       th:href="@{/products(page=${i}, category=${nctSelectedCategoryId}, search=${nctSearchKeyword}, sort=${nctSort})}"
+                       th:text="${i}">
+                    </a>
+                </li>
+
+                <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled pointer-events-none opacity-50'">
+                    <a class="page-link relative block py-1.5 px-3 border-0 bg-transparent outline-none transition-all duration-300 rounded text-gray-800 hover:text-gray-800 hover:bg-gray-200 focus:shadow-none"
+                       th:href="@{/products(page=${currentPage + 1}, category=${nctSelectedCategoryId}, search=${nctSearchKeyword}, sort=${nctSort})}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </main>
 <div th:replace="~{fragments/nct-chat-model :: nct-chat-model(pageContext='*', contextProduct=null)}"></div>

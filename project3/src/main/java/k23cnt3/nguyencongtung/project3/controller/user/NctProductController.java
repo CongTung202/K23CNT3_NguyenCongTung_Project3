@@ -8,6 +8,7 @@ import k23cnt3.nguyencongtung.project3.service.NctCategoryService;
 import k23cnt3.nguyencongtung.project3.service.NctProductService;
 import k23cnt3.nguyencongtung.project3.service.NctUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -52,35 +53,43 @@ public class NctProductController {
             @RequestParam(value = "category", required = false) Long nctCategoryId,
             @RequestParam(value = "search", required = false) String nctSearchKeyword,
             @RequestParam(value = "sort", required = false) String sort,
+            @RequestParam(value = "page", defaultValue = "1") int page,
             Model model, @AuthenticationPrincipal UserDetails userDetails) {
 
         addCommonAttributes(model, userDetails);
-        List<NctProduct> nctProducts;
-        String nctHeaderTitle = "Tất cả sản phẩm";
+        // Cấu hình phân trang: 16 sản phẩm/trang
+        int pageSize = 16;
+        int pageNo = (page < 1) ? 0 : page - 1; // Spring Data tính trang từ 0
+        Page<NctProduct> productPage = nctProductService.nctGetProductsPaginated(pageNo, pageSize, sort, nctCategoryId, nctSearchKeyword);
 
+        List<NctProduct> nctProducts = productPage.getContent();
+        // Xử lý tiêu đề
+        String nctHeaderTitle = "Tất cả sản phẩm";
         if (nctSearchKeyword != null && !nctSearchKeyword.isEmpty()) {
-            nctProducts = nctProductService.nctSearchActiveProducts(nctSearchKeyword);
-            model.addAttribute("nctSearchKeyword", nctSearchKeyword);
             nctHeaderTitle = "Kết quả cho '" + nctSearchKeyword + "'";
+            model.addAttribute("nctSearchKeyword", nctSearchKeyword);
         } else if (nctCategoryId != null) {
-            nctProducts = nctProductService.nctGetActiveProductsByCategoryId(nctCategoryId);
             Optional<NctCategory> categoryOpt = nctCategoryService.nctGetCategoryById(nctCategoryId);
             if (categoryOpt.isPresent()) {
                 nctHeaderTitle = categoryOpt.get().getNctCategoryName();
             }
             model.addAttribute("nctSelectedCategoryId", nctCategoryId);
-        } else {
-            nctProducts = nctProductService.nctGetActiveProducts();
         }
 
         // Apply sorting if requested
         nctProducts = nctProductService.nctSortProducts(nctProducts, sort);
 
+        // Đưa dữ liệu vào Model
         model.addAttribute("nctProducts", nctProducts);
         model.addAttribute("nctCategories", nctCategoryService.nctGetCategoriesWithActiveProducts());
         model.addAttribute("nctHeaderTitle", nctHeaderTitle);
         model.addAttribute("nctPageTitle", nctHeaderTitle + " - UMACT Store");
         model.addAttribute("nctSort", sort);
+
+        // *** Thông tin phân trang cho View ***
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalItems", productPage.getTotalElements());
 
         return "user/nct-products";
     }

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -49,11 +51,11 @@ public interface NctProductRepository extends JpaRepository<NctProduct, Long> {
                                                        @Param("status") NctProduct.NctStatus status);
 
     // Tìm 8 sản phẩm mới nhất
-    @Query("SELECT p FROM NctProduct p ORDER BY p.nctCreatedAt DESC LIMIT 8")
+    @Query("SELECT p FROM NctProduct p ORDER BY p.nctCreatedAt DESC LIMIT 9")
     List<NctProduct> findTop8ByOrderByNctCreatedAtDesc();
 
     // Tìm 8 sản phẩm mới nhất theo trạng thái
-    @Query("SELECT p FROM NctProduct p WHERE p.nctStatus = :status ORDER BY p.nctCreatedAt DESC LIMIT 8")
+    @Query("SELECT p FROM NctProduct p WHERE p.nctStatus = :status ORDER BY p.nctCreatedAt DESC LIMIT 9")
     List<NctProduct> findTop8ByNctStatusOrderByNctCreatedAtDesc(@Param("status") NctProduct.NctStatus status);
 
     // Tìm sản phẩm còn hàng
@@ -78,4 +80,12 @@ public interface NctProductRepository extends JpaRepository<NctProduct, Long> {
                                           @Param("maxPrice") Double maxPrice,
                                           @Param("status") NctProduct.NctStatus status,
                                           @Param("keyword") String keyword);
+    // 1. Lấy tất cả sản phẩm Active có phân trang
+    Page<NctProduct> findByNctStatus(NctProduct.NctStatus nctStatus, Pageable pageable);
+
+    // 2. Lấy sản phẩm theo Danh mục và Active có phân trang
+    Page<NctProduct> findByNctCategory_NctCategoryIdAndNctStatus(Long nctCategoryId, NctProduct.NctStatus nctStatus, Pageable pageable);
+
+    // 3. Tìm kiếm theo tên và Active có phân trang
+    Page<NctProduct> findByNctProductNameContainingIgnoreCaseAndNctStatus(String nctProductName, NctProduct.NctStatus nctStatus, Pageable pageable);
 }

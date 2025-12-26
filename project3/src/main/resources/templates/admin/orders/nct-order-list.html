@@ -147,21 +147,34 @@
     <!-- Pagination -->
     <nav th:if="${nctOrderPage.totalPages > 1}" aria-label="Page navigation" class="mt-4">
         <ul class="pagination justify-content-center">
-            <!-- Previous Page Link -->
+
             <li class="page-item" th:classappend="${nctOrderPage.isFirst()} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/orders(page=${currentPage - 1}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}">Trước</a>
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${currentPage - 1}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}"
+                   style="color: #333;"> Trước
+                </a>
             </li>
 
-            <!-- Page Numbers -->
             <th:block th:each="i : ${#numbers.sequence(1, nctOrderPage.totalPages)}">
-                <li class="page-item" th:if="${i >= currentPage - 2 and i <= currentPage + 2}" th:classappend="${i == currentPage} ? 'active'">
-                    <a class="page-link" th:href="@{/admin/orders(page=${i}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}" th:text="${i}"></a>
+                <li class="page-item"
+                    th:if="${i >= currentPage - 2 and i <= currentPage + 2}"
+                    th:classappend="${i == currentPage} ? 'active'">
+
+                    <a class="page-link"
+                       th:href="@{/admin/orders(page=${i}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}"
+                       th:text="${i}"
+                    th:style="${i == currentPage}
+                    ? 'background-color: #e74c3c; border-color: #e74c3c; color: white;'
+                    : 'color: #333;'">
+                    </a>
                 </li>
             </th:block>
 
-            <!-- Next Page Link -->
             <li class="page-item" th:classappend="${nctOrderPage.isLast()} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/orders(page=${currentPage + 1}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}">Sau</a>
+                <a class="page-link"
+                   th:href="@{/admin/orders(page=${currentPage + 1}, size=${nctOrderPage.size}, keyword=${keyword}, status=${status})}"
+                   style="color: #333;"> Sau
+                </a>
             </li>
         </ul>
     </nav>

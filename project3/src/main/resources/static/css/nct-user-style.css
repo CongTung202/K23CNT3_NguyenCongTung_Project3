@@ -816,6 +816,7 @@ footer a:hover { color: #fff; }
     }
     .promo-grid {
         grid-template-columns: 1fr;
+        display: none !important;
     }
     .product-detail-wrapper {
         flex-direction: column;

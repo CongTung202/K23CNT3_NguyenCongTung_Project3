@@ -33,7 +33,7 @@ public class NctSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers(
-                                "/",
+                                "/**",
                                 "/home",
                                 "/products/**",
                                 "/auth/**",
