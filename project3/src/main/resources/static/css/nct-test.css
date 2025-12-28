@@ -1,0 +1,51 @@
+/* ==========================================================================
+   4. NEW SECTION: MÔ TẢ & GHI CHÚ (Mới)
+   ========================================================================== */
+.product-description-section {
+    background-color: #fff;
+    border-radius: 12px;
+    margin-top: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    overflow: hidden;
+    margin-bottom: 40px;
+}
+
+.section-title {
+    background-color: #f9fafb;
+    padding: 15px 30px;
+    border-bottom: 1px solid #eee;
+    display: flex; align-items: center; gap: 10px;
+}
+.section-title i { color: #ff3333; font-size: 20px; }
+.section-title h3 { font-size: 18px; font-weight: 700; color: #111; margin: 0; }
+
+.description-body { padding: 30px; }
+
+/* Nội dung nctDescription */
+.description-content {
+    font-size: 15px; color: #374151; line-height: 1.8; margin-bottom: 30px;
+}
+.description-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
+.description-content p { margin-bottom: 15px; }
+
+/* Khối Hướng dẫn bảo quản tĩnh (Hobby Guide Note) */
+.hobby-guide-note {
+    background-color: #fffbeb; /* Vàng nhạt */
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 20px;
+}
+.hobby-guide-note h4 {
+    color: #b45309; font-size: 15px; font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+}
+.hobby-guide-note ul { list-style: none; padding-left: 0; }
+.hobby-guide-note li {
+    font-size: 13px; color: #78350f; margin-bottom: 8px; position: relative; padding-left: 15px;
+}
+.hobby-guide-note li::before {
+    content: "•"; color: #b45309; font-weight: bold; position: absolute; left: 0;
+}
+.product-desc {
+    white-space: pre-wrap; /* Tự động xuống dòng giống hệt như lúc bạn gõ phím Enter */
+}

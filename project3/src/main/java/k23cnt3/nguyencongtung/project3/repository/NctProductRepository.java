@@ -51,11 +51,11 @@ public interface NctProductRepository extends JpaRepository<NctProduct, Long> {
                                                        @Param("status") NctProduct.NctStatus status);
 
     // Tìm 8 sản phẩm mới nhất
-    @Query("SELECT p FROM NctProduct p ORDER BY p.nctCreatedAt DESC LIMIT 9")
+    @Query("SELECT p FROM NctProduct p ORDER BY p.nctCreatedAt DESC LIMIT 8")
     List<NctProduct> findTop8ByOrderByNctCreatedAtDesc();
 
     // Tìm 8 sản phẩm mới nhất theo trạng thái
-    @Query("SELECT p FROM NctProduct p WHERE p.nctStatus = :status ORDER BY p.nctCreatedAt DESC LIMIT 9")
+    @Query("SELECT p FROM NctProduct p WHERE p.nctStatus = :status ORDER BY p.nctCreatedAt DESC LIMIT 8")
     List<NctProduct> findTop8ByNctStatusOrderByNctCreatedAtDesc(@Param("status") NctProduct.NctStatus status);
 
     // Tìm sản phẩm còn hàng

@@ -15,6 +15,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    margin-top:55px !important;
     cursor: url('/images/cursor(1).png') 0 0, auto;
 }
 /* Các thành phần Click được -> Chuyển sang Custom Cursor dạng bàn tay */
@@ -80,7 +81,7 @@ header {
 .sidebar {
     position: fixed;
     left: 0;
-    top: 60px;
+    top: 40px;
     width: 250px;
     height: calc(100vh - 60px);
     background-color: #fff;
@@ -156,42 +157,136 @@ header {
 }
 
 /* Footer */
+/* ==========================================================================
+   CUSTOM FOOTER STYLES (UMACT.vn Design)
+   ========================================================================== */
+
 footer {
     background-color: #1a1a1a;
-    color: #fff;
-    padding: 40px 20px;
-    margin-top: 60px;
-    margin-left: 250px;
-    margin-right: 300px; /* Make space for the right sidebar */
-}
-
-footer h3 {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-footer a {
     color: #ccc;
-    text-decoration: none;
-    font-size: 13px;
-    transition: color 0.3s;
+    /* Tạo viền đỏ trên cùng để ngăn cách với nội dung, đồng bộ màu chủ đạo */
+    border-top: 4px solid #ff3333;
+    padding: 50px 40px 20px 40px;
+    margin-top: 60px;
+
+    /* Cấu hình vị trí theo layout 3 cột (Sidebar trái - Main - Sidebar phải) */
+    margin-left: 250px;  /* Né Sidebar trái */
+    margin-right: 300px; /* Né Character Guide phải */
+
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 50; /* Đảm bảo nằm trên các element trôi nổi nếu có */
 }
 
-footer a:hover { color: #fff; }
-.footer-section { margin-bottom: 30px; }
+/* Layout Grid cho nội dung bên trong */
+footer .footer-content-grid {
+    display: grid;
+    /* Chia làm 2 cột lớn hoặc tùy chỉnh thành 3-4 cột tùy nội dung */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 40px;
+}
 
-.footer-info {
+/* Style cho từng cột (Section) */
+footer .footer-section h3 {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    /* Thêm gạch đứng màu đỏ giống các tiêu đề khác trong trang */
+    border-left: 3px solid #ff3333;
+    padding-left: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* Style cho các dòng thông tin liên hệ */
+footer .footer-info {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 12px;
-    font-size: 13px;
-    color: #ccc;
+    gap: 12px;
+    margin-bottom: 15px;
+    color: #b0b0b0;
+    transition: color 0.3s ease;
 }
 
-.footer-info i { margin-top: 2px; }
+footer .footer-info:hover {
+    color: #fff;
+}
 
+/* Icon màu đỏ nổi bật */
+footer .footer-info i {
+    color: #ff3333;
+    font-size: 16px;
+    margin-top: 4px; /* Căn chỉnh với dòng text */
+    width: 20px;
+    text-align: center;
+}
+
+/* Style cho danh sách link (Chính sách, menu...) */
+footer .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+footer .footer-links a {
+    color: #b0b0b0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
+}
+
+/* Hiệu ứng hover: Sáng lên + Trượt sang phải + Đổi màu icon custom cursor */
+footer .footer-links a:hover {
+    color: #ff3333;
+    padding-left: 8px; /* Trượt nhẹ sang phải */
+}
+
+/* Phần bản quyền dưới cùng */
+footer .copyright-area {
+    border-top: 1px solid #333;
+    padding-top: 25px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+
+footer .copyright-area span.brand {
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+footer .copyright-area span.dev {
+    color: #ff3333; /* Tên dev màu đỏ cho ngầu */
+}
+
+/* ==========================================================================
+   RESPONSIVE FOOTER (Đồng bộ với logic file gốc)
+   ========================================================================== */
+
+/* Khi màn hình nhỏ hơn 1440px (Ẩn Character Guide bên phải) */
+@media (max-width: 1440px) {
+    footer {
+        margin-right: 0; /* Tràn ra lề phải */
+    }
+}
+
+/* Khi màn hình nhỏ hơn 768px (Ẩn Sidebar trái - Giao diện Mobile) */
+@media (max-width: 768px) {
+    footer {
+        margin-left: 0; /* Tràn ra lề trái */
+        padding: 40px 20px;
+    }
+
+    footer .footer-content-grid {
+        grid-template-columns: 1fr; /* Chuyển thành 1 cột dọc */
+        gap: 30px;
+    }
+}
 /* ==========================================================================
    3. Reusable Components
    ========================================================================== */
@@ -1182,9 +1277,8 @@ footer a:hover { color: #fff; }
 }
 
 .info-card i {
-    font-size: 28px;
+    font-size: 20px;
     color: #ff3333;
-    margin-bottom: 15px;
 }
 
 .info-card h4 {
